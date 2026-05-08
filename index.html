@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="HC2AyVt799CTZvCbOIuRZa6qzsU725H7dmiK0891NY4" />
+<title>WasmSec-WebAssembly Security Papers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+[data-theme="dark"] {
+  --bg: #070c12;
+  --surface: #0d1520;
+  --surface2: #132030;
+  --surface3: #192b3e;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --border3: rgba(255,255,255,0.2);
+  --text: #d8eaf5;
+  --text2: #7ea8be;
+  --muted: #42687c;
+  --accent: #0ea5c8;
+  --accent-dim: rgba(14,165,200,0.14);
+  --accent-glow: rgba(14,165,200,0.07);
+  --tag-bg: rgba(14,165,200,0.1);
+  --tag-text: #67d4f0;
+  --tag-border: rgba(14,165,200,0.22);
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.11);
+  --orange: #f97316;
+  --orange-dim: rgba(249,115,22,0.12);
+  --yellow: #fbbf24;
+  --yellow-dim: rgba(251,191,36,0.1);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --header-bg: rgba(7,12,18,0.88);
+  --modal-bg: #0d1520;
+  --select-opt: #132030;
+  --hero-g1: #0ea5c8;
+  --hero-g2: #38bdf8;
+}
+
+[data-theme="light"] {
+  --bg: #f0f5f9;
+  --surface: #ffffff;
+  --surface2: #e6eff6;
+  --surface3: #d6e6f0;
+  --border: rgba(0,0,0,0.09);
+  --border2: rgba(0,0,0,0.15);
+  --border3: rgba(0,0,0,0.25);
+  --text: #071824;
+  --text2: #1a3d52;
+  --muted: #3a6070;
+  --accent: #0369a1;
+  --accent-dim: rgba(3,105,161,0.1);
+  --accent-glow: rgba(3,105,161,0.06);
+  --tag-bg: rgba(3,105,161,0.08);
+  --tag-text: #0c4a6e;
+  --tag-border: rgba(3,105,161,0.25);
+  --green: #065f46;
+  --green-dim: rgba(6,95,70,0.09);
+  --orange: #92340a;
+  --orange-dim: rgba(146,52,10,0.09);
+  --yellow: #78350f;
+  --yellow-dim: rgba(120,53,15,0.09);
+  --red: #991b1b;
+  --red-dim: rgba(153,27,27,0.08);
+  --header-bg: rgba(240,245,249,0.94);
+  --modal-bg: #ffffff;
+  --select-opt: #f0f5f9;
+  --hero-g1: #0369a1;
+  --hero-g2: #0284a8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+/* ── HEADER ── */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 0 2.5rem;
+  position: sticky;
+  top: 0;
+  background: var(--header-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+  gap: 1rem;
+}
+
+.logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  font-weight: 700;
+}
+
+nav { display: flex; align-items: center; gap: 2px; }
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  padding: 6px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.nav-btn:hover { color: var(--text); background: var(--surface2); }
+.nav-btn.active { color: var(--text); background: var(--surface2); }
+
+.nav-suggest {
+  background: var(--accent-dim);
+  border: 1px solid rgba(14,165,200,0.3);
+  color: var(--tag-text);
+}
+
+.nav-suggest:hover {
+  background: rgba(14,165,200,0.2);
+  color: var(--text);
+}
+
+.theme-toggle {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.theme-toggle:hover {
+  background: var(--surface3);
+  border-color: var(--border3);
+  color: var(--text);
+}
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HERO ── */
+.hero {
+  padding: 5rem 2.5rem 3rem;
+  max-width: 1160px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+  align-items: start;
+}
+
+.hero-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+  font-weight: 300;
+  line-height: 1.08;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.hero h1 strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--hero-g1), var(--hero-g2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  color: var(--text2);
+  font-size: 15px;
+  max-width: 520px;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+/* ── STATS ── */
+.stats-bar {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 2.5rem 2.5rem;
+  display: flex;
+  gap: 0;
+}
+
+.stat-block {
+  flex: 1;
+  padding: 1.1rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.15s;
+}
+
+.stat-block:first-child { border-radius: 10px 0 0 10px; }
+.stat-block:last-child { border-radius: 0 10px 10px 0; }
+.stat-block:not(:first-child) { border-left: none; }
+.stat-block:hover { background: var(--surface2); }
+
+.stat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── CONTROLS ── */
+.controls-wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.search-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+  pointer-events: none;
+  font-family: 'Space Mono', monospace;
+}
+
+input[type="text"] {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  padding: 10px 12px 10px 38px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+input[type="text"]::placeholder { color: var(--muted); }
+input[type="text"]:focus { border-color: var(--accent); background: var(--surface2); }
+
+.ctrl-select {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  min-width: 165px;
+  transition: border-color 0.15s;
+}
+
+.ctrl-select:focus { border-color: var(--accent); }
+.ctrl-select option { background: var(--select-opt); }
+
+.toggle-chip {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.toggle-chip.active {
+  background: var(--accent-dim);
+  border-color: rgba(14,165,200,0.4);
+  color: var(--tag-text);
+}
+
+.toggle-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.filter-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-row-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-right: 3px;
+  font-family: 'Space Mono', monospace;
+  white-space: nowrap;
+}
+
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 11px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.pill:hover { border-color: var(--border2); color: var(--text2); }
+
+.pill.active {
+  background: var(--accent-dim);
+  border-color: rgba(14,165,200,0.35);
+  color: var(--tag-text);
+}
+
+/* ── RESULT ROW ── */
+.result-row {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 2.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.result-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.result-count span { color: var(--accent); }
+
+.clear-btn {
+  font-size: 11px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  padding: 3px 7px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.clear-btn:hover { color: var(--text2); }
+
+/* ── PAPER GRID ── */
+.papers-grid {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 2.5rem 5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+}
+
+.paper-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+
+.paper-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.paper-card:hover {
+  border-color: var(--border3);
+  background: var(--surface2);
+  transform: translateY(-2px);
+}
+
+.paper-card:hover::before { opacity: 1; }
+
+.paper-card.hidden { display: none; }
+
+.paper-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.paper-venue {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(62,207,142,0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.paper-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface3);
+  padding: 3px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.paper-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.paper-authors {
+  font-size: 11.5px;
+  color: var(--text2);
+  font-weight: 300;
+}
+
+.paper-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.paper-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 1px solid var(--tag-border);
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: 'Space Mono', monospace;
+}
+
+.tag:hover {
+  background: rgba(14,165,200,0.2);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.paper-links {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.link-btn {
+  font-size: 11px;
+  padding: 5px 11px;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.12s;
+  font-family: 'Sora', sans-serif;
+  font-weight: 400;
+}
+
+.link-btn.pdf {
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid rgba(240,122,62,0.22);
+}
+
+.link-btn.pdf:hover { background: rgba(240,122,62,0.22); }
+
+.link-btn.code {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 1px solid rgba(245,200,66,0.2);
+}
+
+.link-btn.code:hover { background: rgba(245,200,66,0.2); }
+
+.code-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── NO RESULTS ── */
+.no-results {
+  display: none;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.no-results.show { display: block; }
+
+.no-results-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 500;
+  backdrop-filter: blur(4px);
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+.modal {
+  background: var(--modal-bg);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  max-width: 680px;
+  width: 100%;
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+  animation: modalIn 0.22s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  padding: 1.5rem 1.6rem 1rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: 'Space Mono', monospace;
+}
+
+.modal-close:hover { background: var(--surface2); color: var(--text); border-color: var(--border3); }
+
+.modal-venue-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.8rem;
+}
+
+.modal-venue {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(62,207,142,0.2);
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.modal-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface3);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.modal-peer-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(14,165,200,0.22);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  padding-right: 2.5rem;
+}
+
+.modal-body {
+  padding: 1.2rem 1.6rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.modal-section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+}
+
+.modal-authors {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.modal-desc {
+  font-size: 13.5px;
+  color: var(--text2);
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+.modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.modal-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.modal-link-btn {
+  font-size: 12px;
+  padding: 7px 16px;
+  border-radius: 7px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.modal-link-btn.pdf {
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid rgba(240,122,62,0.25);
+}
+
+.modal-link-btn.pdf:hover { background: rgba(240,122,62,0.22); }
+
+.modal-link-btn.code {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 1px solid rgba(245,200,66,0.22);
+}
+
+.modal-link-btn.code:hover { background: rgba(245,200,66,0.2); }
+
+/* ── ABOUT PAGE ── */
+.about-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 5rem;
+}
+
+.page-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.page-heading {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.page-heading strong { font-weight: 600; }
+
+.page-intro {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.8;
+  margin-bottom: 3rem;
+  font-weight: 300;
+}
+
+.about-section {
+  margin-bottom: 2.5rem;
+}
+
+.about-section-title {
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+}
+
+.about-text {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.85;
+  font-weight: 300;
+}
+
+.about-text + .about-text { margin-top: 0.85rem; }
+
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin: 1.2rem 0;
+}
+
+.company-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.company-chip:hover { border-color: var(--accent); color: var(--text); }
+
+.vuln-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 1rem 0;
+}
+
+.vuln-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text2);
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.vuln-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.about-goal-box {
+  background: var(--accent-glow);
+  border: 1px solid rgba(14,165,200,0.2);
+  border-radius: 10px;
+  padding: 1.4rem 1.5rem;
+  margin-top: 1.2rem;
+}
+
+.about-goal-box p {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+.about-goal-box p + p { margin-top: 0.75rem; }
+
+/* ── DISCLAIMER PAGE ── */
+.disclaimer-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 5rem;
+}
+
+.disclaimer-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 1.5rem 1.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.disclaimer-box-title {
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.disc-icon {
+  width: 16px;
+  height: 16px;
+  background: var(--orange-dim);
+  border: 1px solid rgba(240,122,62,0.25);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.disclaimer-text {
+  font-size: 13.5px;
+  color: var(--text2);
+  line-height: 1.85;
+  font-weight: 300;
+}
+
+.disclaimer-text + .disclaimer-text { margin-top: 0.75rem; }
+
+.disclaimer-text a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.disclaimer-text a:hover { text-decoration: underline; }
+
+.contact-note {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-top: 1.5rem;
+}
+
+/* ── SUGGEST PAGE ── */
+.suggest-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 5rem;
+}
+
+.gform-container {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.gform-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gform-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.gform-header span {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  margin-left: auto;
+}
+
+iframe.gform {
+  width: 100%;
+  border: none;
+  display: block;
+  background: #fff;
+  min-height: 840px;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-brand {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+}
+
+.footer-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.footer-maintained {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-maintained a {
+  color: var(--accent);
+  text-decoration: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+}
+
+.footer-maintained a:hover { text-decoration: underline; }
+
+/* ── HIGHLIGHT ── */
+mark {
+  background: rgba(14,165,200,0.2);
+  color: var(--tag-text);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  header { padding: 0 1.2rem; }
+  .hero { padding: 3rem 1.2rem 2rem; }
+  .hero-grid { grid-template-columns: 1fr; gap: 0; }
+  .stats-bar { padding: 0 1.2rem 2rem; }
+  .stat-block { padding: 0.9rem 1rem; }
+  .stat-num { font-size: 18px; }
+  .controls-wrap { padding: 0 1.2rem 1rem; }
+  .result-row { padding: 0 1.2rem 0.8rem; }
+  .papers-grid { padding: 0 1.2rem 3rem; grid-template-columns: 1fr; }
+  footer { padding: 1.5rem 1.2rem; flex-direction: column; align-items: flex-start; }
+  .about-wrap, .disclaimer-wrap, .suggest-wrap { padding: 2.5rem 1.2rem 4rem; }
+  .modal-overlay { padding: 1rem; }
+  .modal-title { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <a class="logo" onclick="showPage('browse')">
+    <div class="logo-icon">W</div>
+    WasmSec
+  </a>
+  <nav>
+    <button class="nav-btn active" id="nav-browse" onclick="showPage('browse')">Browse</button>
+    <button class="nav-btn" id="nav-about" onclick="showPage('about')">About</button>
+    <button class="nav-btn" id="nav-disclaimer" onclick="showPage('disclaimer')">Disclaimer</button>
+    <button class="nav-btn nav-suggest" id="nav-suggest" onclick="showPage('suggest')">+ Suggest Paper</button>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle theme">
+      <span id="theme-icon">☀</span>
+    </button>
+  </nav>
+</header>
+
+<!-- ══════════ BROWSE PAGE ══════════ -->
+<div id="page-browse" class="page active">
+
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <p class="hero-eyebrow">Research Collection</p>
+        <h1><strong>WebAssembly</strong><br><em>Security Research Papers</em></h1>
+        <p class="hero-desc">A curated collection of academic papers covering the intersection of WebAssembly and security - from memory safety and sandboxing to malware detection, formal verification, program analysis, test-cases generation and side-channel attacks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-block">
+      <div class="stat-num" id="total-count">—</div>
+      <div class="stat-label">Total Papers</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num" id="code-count">—</div>
+      <div class="stat-label">With Code</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num" id="year-range">—</div>
+      <div class="stat-label">Year Range</div>
+    </div>
+  </div>
+
+  <div class="controls-wrap">
+    <div class="search-row">
+      <div class="search-wrap">
+        <span class="search-icon">/</span>
+        <input type="text" id="search" placeholder="Search by title, author, keyword…">
+      </div>
+      <select class="ctrl-select" id="sort">
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+        <option value="title-asc">Title A → Z</option>
+        <option value="title-desc">Title Z → A</option>
+      </select>
+      <button class="toggle-chip" id="code-toggle">
+        <span class="toggle-dot"></span>With Code Only
+      </button>
+    </div>
+    <div class="filter-row" id="keyword-filters">
+      <span class="filter-row-label">Topic</span>
+    </div>
+    <div class="filter-row" id="year-filters">
+      <span class="filter-row-label">Year</span>
+    </div>
+  </div>
+
+  <div class="result-row">
+    <span class="result-count">Showing <span id="showing-count">—</span> of <span id="total-showing">—</span> papers</span>
+    <button class="clear-btn" onclick="clearFilters()">Clear all ×</button>
+  </div>
+
+  <div class="papers-grid" id="papers-grid"></div>
+  <div class="no-results" id="no-results">
+    <div class="no-results-icon">∅</div>
+    <p>No papers match your search.</p>
+    <br>
+    <button class="clear-btn" onclick="clearFilters()" style="color:var(--text2);font-size:13px;">Clear filters</button>
+  </div>
+
+</div><!-- /page-browse -->
+
+<!-- ══════════ ABOUT PAGE ══════════ -->
+<div id="page-about" class="page">
+  <div class="about-wrap">
+    <p class="page-eyebrow">About This Project</p>
+    <h1 class="page-heading"><strong>WebAssembly</strong><br>Security Research Hub</h1>
+    <p class="page-intro">WasmSec is a curated reference database for academic research at the intersection of WebAssembly and computer security. Every paper listed here has been manually reviewed for relevance.</p>
+
+    <div class="about-section">
+      <div class="about-section-title">WebAssembly in the Wild</div>
+      <p class="about-text">WebAssembly (Wasm) is no longer an experimental technology — it is a production runtime powering some of the world's most used applications. Its promise of near-native performance in a portable, sandboxed format has driven adoption across industries.</p>
+      <p class="about-text">Some of the most prominent examples include:</p>
+      <div class="company-grid">
+        <div class="company-chip">Figma</div>
+        <div class="company-chip">Photoshop</div>
+        <div class="company-chip">AutoCAD</div>
+        <div class="company-chip">Google Earth</div>
+        <div class="company-chip">Zoom</div>
+        <div class="company-chip">Cloudflare</div>
+        <div class="company-chip">Fastly</div>
+        <div class="company-chip">Shopify</div>
+        <div class="company-chip">Unity</div>
+        <div class="company-chip">eBay</div>
+        <div class="company-chip">Docker</div>
+        <div class="company-chip">Wasmer</div>
+      </div>
+      <p class="about-text">Adobe's Photoshop on the web leverages WebAssembly to run complex image processing algorithms. Figma's rendering engine is largely compiled to Wasm. AutoCAD's web edition ships millions of lines of C++ compiled to WebAssembly. Beyond the browser, WebAssembly is becoming the preferred sandbox format for serverless edge computing, IoT firmware, and plugin architectures.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-section-title">Security Vulnerabilities &amp; Risks</div>
+      <p class="about-text">Despite its sandboxing guarantees, WebAssembly introduces a range of security concerns - both inherited from its source languages and intrinsic to its design:</p>
+      <ul class="vuln-list">
+        <li><span class="vuln-dot"></span><span><strong>Memory corruption:</strong> Wasm's linear memory model has no native memory safety for code compiled from C/C++. Buffer overflows, heap sprays, and use-after-free vulnerabilities persist and can be leveraged for control-flow hijacking.</span></li>
+        <li><span class="vuln-dot"></span><span><strong>Cryptojacking:</strong> Wasm's near-native execution speed makes it an attractive vehicle for in-browser cryptocurrency mining without user consent, often embedded in otherwise legitimate websites.</span></li>
+        <li><span class="vuln-dot"></span><span><strong>Malware obfuscation:</strong> Attackers exploit Wasm's binary format to hide malicious logic from traditional static analysis and antivirus engines, including obfuscating JavaScript malware by translating it to Wasm.</span></li>
+        <li><span class="vuln-dot"></span><span><strong>Side-channel attacks:</strong> WebAssembly provides high-resolution timing primitives and fine-grained memory control that enable Spectre-style microarchitectural attacks and cache timing attacks.</span></li>
+        <li><span class="vuln-dot"></span><span><strong>Runtime bugs:</strong> Wasm runtimes (V8, SpiderMonkey, Wasmtime, Wasmer) are complex C++ codebases with their own bugs that can crash applications or enable privilege escalation.</span></li>
+        <li><span class="vuln-dot"></span><span><strong>Smart contract vulnerabilities:</strong> EOSIO and other blockchain platforms use Wasm as the smart contract execution environment, inheriting the language's vulnerability surface in high-value financial contexts.</span></li>
+        <li><span class="vuln-dot"></span><span><strong>Absence of mitigations:</strong> Unlike native binaries, WebAssembly lacks stack canaries, ASLR, and other hardening features by default, making classic attacks easier to execute.</span></li>
+      </ul>
+    </div>
+
+    <div class="about-section">
+      <div class="about-section-title">Our Goal</div>
+      <div class="about-goal-box">
+        <p>WasmSec aims to be the most comprehensive, well-organized reference for researchers, engineers, and security professionals working on or with WebAssembly. I collect, categorize, and annotate academic papers covering every dimension of Wasm security - whether you're studying attacks, defenses, formal proofs, or analysis tooling.</p>
+        <p>All papers in this database have been manually reviewed and selected based on direct relevance to WebAssembly security. It covers peer-reviewed conference and journal publications as well as high-quality preprints. Papers are tagged by topic to make it easy to explore specific sub-domains like fuzzing, information flow, sandboxing, or cryptojacking.</p>
+        <p>If you know of a paper missing, or would like to suggest a correction, please use the <strong>Suggest Paper</strong> form.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ DISCLAIMER PAGE ══════════ -->
+<div id="page-disclaimer" class="page">
+  <div class="disclaimer-wrap">
+    <p class="page-eyebrow">Disclaimer</p>
+    <h1 class="page-heading"><strong>Data &amp; Attribution</strong><br>Disclaimer</h1>
+    <p class="page-intro">Please read this disclaimer carefully before relying on any information presented on this website.</p>
+
+    <div class="disclaimer-box">
+      <div class="disclaimer-box-title">
+        <div class="disc-icon">!</div>
+        Manual Data Entry
+      </div>
+      <p class="disclaimer-text">All paper entries on WasmSec were imported manually. While I strive for accuracy, typographical errors, missing details, or incorrect metadata may be present. I sincerely apologize for any such mistakes and are committed to correcting them as soon as they are reported.</p>
+    </div>
+
+    <div class="disclaimer-box">
+      <div class="disclaimer-box-title">
+        <div class="disc-icon">!</div>
+        Representation of Work
+      </div>
+      <p class="disclaimer-text">Paper descriptions, abstracts, and keyword tags are written or curated to be accurate summaries of the original work. However, I acknowledge that summarizing complex academic research inevitably involves some degree of simplification.</p>
+      <p class="disclaimer-text">I sincerely apologize if I have misrepresented any paper or author's work in any way. This is never intentional. If you are an author and feel that your work has been incorrectly described, attributed, or categorized, please contact immediately through the Suggest / Edit form and I will promptly correct the entry.</p>
+    </div>
+
+    <div class="disclaimer-box">
+      <div class="disclaimer-box-title">
+        <div class="disc-icon">!</div>
+        Copyright &amp; Links
+      </div>
+      <p class="disclaimer-text">WasmSec does not host any paper PDFs directly. All "Paper" links point to publicly available versions hosted by the respective publishers, authors, or archiving platforms such as arXiv, ACM DL, IEEE Xplore, USENIX, or the authors' own websites. I do not claim copyright over any linked materials.</p>
+      <p class="disclaimer-text">External links may become unavailable over time as publishers update their systems. I am not responsible for the availability or content of external sites.</p>
+    </div>
+
+    <div class="disclaimer-box">
+      <div class="disclaimer-box-title">
+        <div class="disc-icon">!</div>
+        Completeness &amp; Bias
+      </div>
+      <p class="disclaimer-text">This database does not claim to be exhaustive. Paper selection is based on the review and may reflect gaps in coverage, particularly for work published in venues outside the main security and programming language conferences. I actively welcome suggestions for papers I may have missed.</p>
+    </div>
+
+    <div class="contact-note">
+      <strong>Found a mistake?</strong> Please be patient with errors. Use the <button onclick="showPage('suggest')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:inherit;padding:0;text-decoration:underline;">Suggest / Edit form</button> to report any issues and will address them as quickly as possible. Thank you for helping us improve.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SUGGEST PAGE ══════════ -->
+<div id="page-suggest" class="page">
+  <div class="suggest-wrap">
+    <p class="page-eyebrow">Contribute</p>
+    <h1 class="page-heading"><strong>Suggest a Paper</strong><br>or Edit an Entry</h1>
+    <p class="page-intro" style="margin-bottom:0;">Know a paper it is missing? Found an error in an existing entry? Fill out the form below. All submissions are reviewed before being added to the database.</p>
+
+    <div class="gform-container">
+      <div class="gform-header">
+        <div class="gform-dot" style="background:#e05a5a;"></div>
+        <div class="gform-dot" style="background:#f5c842;margin-left:5px;"></div>
+        <div class="gform-dot" style="background:#3ecf8e;margin-left:5px;"></div>
+        <span>docs.google.com / forms</span>
+      </div>
+      <iframe
+        class="gform"
+        src="https://docs.google.com/forms/d/e/1FAIpQLScWuBduYFmNyGv8NqLUIH5XRz3jSBn0V3YxNRINDyOUvRFIhg/viewform?embedded=true"
+        title="Suggest or Edit a Paper"
+        loading="lazy">
+        Loading form…
+      </iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PAPER MODAL ══════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-venue-row">
+        <span class="modal-venue" id="m-venue"></span>
+        <span class="modal-year" id="m-year"></span>
+        <span class="modal-peer-badge" id="m-peer" style="display:none;">Peer Reviewed</span>
+      </div>
+      <div class="modal-title" id="m-title"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-section-label">Authors</div>
+        <div class="modal-authors" id="m-authors"></div>
+      </div>
+      <div>
+        <div class="modal-section-label">Summary</div>
+        <div class="modal-desc" id="m-desc"></div>
+      </div>
+      <div>
+        <div class="modal-section-label">Keywords</div>
+        <div class="modal-tags" id="m-tags"></div>
+      </div>
+      <div class="modal-links" id="m-links"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-left">
+    <div class="footer-brand">WasmSec Papers</div>
+    <div class="footer-sub">WebAssembly Security Research Collection · All papers manually reviewed</div>
+  </div>
+  <div class="footer-maintained">
+    Maintained by&nbsp;<a href="https://www.github.com/dhruthan" target="_blank">@dhruthan</a>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════
+   PAPER DATA
+═══════════════════════════════════════════ */
+const PAPERS = [
+  {title:"WebAssembly across Platforms: Running Native Apps in the Browser, Cloud, and Edge",authors:["Guru Pramod Rusum"],year:2022,venue:"IJETCSIT",description:"Discusses how WebAssembly (Wasm) enables the secure, high-performance execution of native applications across browsers, cloud environments, and edge devices. Evaluates runtime engines like Wasmtime, Wasmer, and V8, analyzes performance metrics including cold start times and memory footprints, and highlights Wasm's sandboxing architecture for isolating multi-tenant workloads.",keywords:["WebAssembly","Runtime Systems","Cross-Platform","Edge Computing","Wasmer","Browser Runtime","Portable Code"],paper_url:null,code_url:null,peer_reviewed:true},
+  {title:"Intel Software Guard Extensions Applications: A Survey",authors:["Newton C. Will","Carlos A. Maziero"],year:2023,venue:"ACM Computing Surveys",description:"A comprehensive survey of the Intel SGX architecture, analyzing and categorizing 293 papers on its applications to provide data integrity, confidentiality, and privacy. Discusses SGX limitations, performance issues, and future research challenges related to enclaved execution.",keywords:["Hardware-based security","Intel SGX","Trusted Execution Environments","Confidentiality","Integrity"],paper_url:null,code_url:null,peer_reviewed:true},
+  {title:"DRWASI: LLM-assisted Differential Testing for WebAssembly System Interface Implementations",authors:["Yixuan Zhang","Ningyu He","Jianting Gao","Shangtong Cao","Kaibo Liu","Haoyu Wang","Yun Ma","Gang Huang","Xuanzhe Liu"],year:2026,venue:"ACM TOSEM",description:"Introduces DRWASI, the first general-purpose, LLM-assisted differential testing framework designed to identify implementation bugs within WebAssembly System Interface (WASI) implementations. Utilizes a large language model to generate test seeds and employs variant and environment mutation strategies, successfully uncovering previously unknown bugs across major Wasm runtimes.",keywords:["WebAssembly","WASI","Differential Testing","Large Language Models","Bug Detection","Wasm Runtimes"],paper_url:"https://dl.acm.org/doi/pdf/10.1145/3716379",code_url:null,peer_reviewed:true},
+  {title:"TaintAssembly: Taint-Based Information Flow Control Tracking for WebAssembly",authors:["William Fu","Raymond Lin","Daniel Inge"],year:2018,venue:"arXiv",description:"A dynamic taint tracking engine for interpreted WebAssembly, implemented by modifying the V8 JavaScript engine. Tracks information flow to detect unexpected behavior and vulnerabilities between WebAssembly and JavaScript, featuring basic taint tracking, a shadow heap for linear memory tainting, and probabilistic taint propagation.",keywords:["WebAssembly","Taint Tracking","V8","Chromium","Information Flow"],paper_url:null,code_url:"https://github.com/wfus/WebAssembly-Taint",peer_reviewed:false},
+  {title:"Taint Tracking for WebAssembly",authors:["Aron Szanto","Timothy Tamm","Artidoro Pagnoni"],year:2018,venue:"arXiv",description:"Details the development of the first JavaScript-based WebAssembly virtual machine and an accompanying taint tracking system. Introduces the concept of 'indirect taint' to monitor implicit flows of sensitive information between variables.",keywords:["WebAssembly","Taint Tracking","Information Flow","Virtual Machine","JavaScript","Security"],paper_url:null,code_url:null,peer_reviewed:false},
+  {title:"WASim: Understanding WebAssembly Applications through Classification",authors:["Alan Romano","Weihang Wang"],year:2020,venue:"ASE 2020",description:"Introduces WASim, an automated classification tool designed to identify the purpose of WebAssembly programs by analyzing features at the module-level. Extracts file, program complexity, and WebAssembly-specific features to train machine learning classifiers, categorizing modules into eleven predefined classes such as cryptominers, games, or cryptographic utilities.",keywords:["WebAssembly","Classification","Machine Learning","Program Comprehension","Neural Networks"],paper_url:"https://dl.acm.org/doi/10.1145/3324884.3415293",code_url:"https://github.com/WASimilarity/WASim",peer_reviewed:true},
+  {title:"WasmView: Visual Testing for WebAssembly Applications",authors:["Alan Romano","Weihang Wang"],year:2020,venue:"ICSE-Companion 2020",description:"Introduces WasmView, a visual testing and debugging tool for WebAssembly applications. Instruments JavaScript WebAssembly APIs to trace cross-language function calls between WebAssembly and JavaScript, generating visual call graphs and capturing stack traces and screenshots.",keywords:["WebAssembly","Visual Testing","Debugging","Call Graph Visualization","Cross-Language Interaction","Dynamic Analysis"],paper_url:"https://dl.acm.org/doi/10.1145/3377812.3382155",code_url:"https://github.com/wasmview/wasmview.github.io",peer_reviewed:true},
+  {title:"MinerRay: Semantics-Aware Analysis for Ever-Evolving Cryptojacking Detection",authors:["Alan Romano","Yunhui Zheng","Weihang Wang"],year:2020,venue:"ASE 2020",description:"A semantics-aware detection scheme for identifying stealthy in-browser cryptojacking across both WebAssembly and JavaScript implementations. By abstracting program semantics to infer the core steps of cryptographic hashing, MinerRay robustly detects ever-evolving miners that evade standard signature-based and runtime feature-based detectors.",keywords:["Cryptojacking","WebAssembly","JavaScript","Malware Detection","Semantics-Aware Analysis","Program Abstraction"],paper_url:"https://dl.acm.org/doi/10.1145/3324884.3416580",code_url:"https://miner-ray.github.io/",peer_reviewed:true},
+  {title:"New Kid on the Web: A Study on the Prevalence of WebAssembly in the Wild",authors:["Marius Musch","Christian Wressnegger","Martin Johns","Konrad Rieck"],year:2019,venue:"DIMVA 2019",description:"The first large-scale study on the prevalence of WebAssembly on the Web by analyzing the Alexa Top 1 million websites. Reveals that over 50% of sites utilizing WebAssembly were using it for malicious purposes, primarily in-browser cryptomining and code obfuscation.",keywords:["WebAssembly","Security","Cryptomining","Code Obfuscation","Empirical Study","Web Measurement"],paper_url:"https://intellisec.de/pubs/2019a-dimva.pdf",code_url:null,peer_reviewed:true},
+  {title:"Gobi: WebAssembly as a Practical Path to Library Sandboxing",authors:["Shravan Narayan","Tal Garfinkel","Sorin Lerner","Deian Stefan","Hovav Shacham"],year:2019,venue:"arXiv",description:"Introduces Gobi, a system designed to bring WebAssembly's security benefits to native platforms by providing practical Software-based Fault Isolation (SFI). Details compiler modifications and runtime support that allow standard C/C++ libraries to be sandboxed within WebAssembly and securely linked into native host applications.",keywords:["WebAssembly","Sandboxing","Software-based Fault Isolation","SFI","Security","C/C++ Libraries"],paper_url:"https://arxiv.org/abs/1912.02285",code_url:null,peer_reviewed:false},
+  {title:"WARDuino: A Dynamic WebAssembly Virtual Machine for Programming Microcontrollers",authors:["Robbert Gurdeep Singh","Christophe Scholliers"],year:2019,venue:"MPLR 2019",description:"Investigates the feasibility of using WebAssembly to program Arduino-compatible microcontrollers. Introduces WARDuino, an extended WebAssembly virtual machine that features safe live code updates, remote debugging support at the VM level, and programmer-configurable modules.",keywords:["WebAssembly","Microcontrollers","Virtual Machine","Arduino","IoT","Dynamic Updates","Remote Debugging"],paper_url:"https://dl.acm.org/doi/10.1145/3357390.3361029",code_url:null,peer_reviewed:true},
+  {title:"WaVe: a verifiably secure WebAssembly sandboxing runtime",authors:["Evan Johnson","Shravan Narayan","Evan Laufer","Zijie Zhao","Dan Gohman","Deian Stefan","Fraser Brown","Stefan Savage"],year:2023,venue:"IEEE S&P 2023",description:"A formally verified WebAssembly runtime designed to implement the WebAssembly System Interface (WASI) securely. Guarantees that interactions with the host operating system strictly maintain Wasm's memory safety, file system and network access isolation, without sacrificing performance when compared to unsafe industrial runtimes.",keywords:["WebAssembly","Sandboxing","WASI","Formal Verification","Runtime Security","OS Isolation"],paper_url:"https://ieeexplore.ieee.org/document/10179357",code_url:"https://wave.programming.systems/",peer_reviewed:true},
+  {title:"Provably-Safe Multilingual Software Sandboxing using WebAssembly",authors:["Jay Bosamiya","Wen Shih Lim","Bryan Parno"],year:2022,venue:"USENIX Security 2022",description:"Explores two distinct methods for creating provably secure WebAssembly sandboxing compilers. The first, vWasm, uses formal machine-checked proofs in F* to guarantee memory safety, while the second, rWasm, leverages safe Rust code to achieve provable safety with execution speeds competitive with unsafe industrial compilers.",keywords:["WebAssembly","Software Sandboxing","Formal Verification","Rust","Provable Security","Compiler","vWasm","rWasm"],paper_url:"https://www.usenix.org/conference/usenixsecurity22/presentation/bosamiya",code_url:"https://github.com/secure-foundations/provably-safe-sandboxing-wasm-usenix22",peer_reviewed:true},
+  {title:"SFI safety for native-compiled Wasm (VeriWasm)",authors:["Evan Johnson","Fraser Brown","David Thien","Yousef Alhessi","Shravan Narayan","Tyler McMullen","Stefan Savage","Sorin Lerner","Deian Stefan"],year:2021,venue:"NDSS 2021",description:"Introduces VeriWasm, a static offline verifier for checking the memory safety and control-flow isolation of native x86-64 binaries compiled from WebAssembly. Removes the compiler from the trusted computing base and proves soundness using a mechanically checked formal model in Coq.",keywords:["WebAssembly","Software-based Fault Isolation","Static Analysis","Formal Verification","SFI","VeriWasm","Native Compilation"],paper_url:"https://www.ndss-symposium.org/wp-content/uploads/ndss2021_5B-3_24078_paper.pdf",code_url:"https://veriwasm.programming.systems",peer_reviewed:true},
+  {title:"WRTESTER: Differential Testing of WebAssembly Runtimes via Semantic-aware Binary Generation",authors:["Shangtong Cao","Yixuan Zhang","Ningyu He","Mu Zhang"],year:2023,venue:"arXiv",description:"Presents WRTESTER, a novel differential testing framework to detect bugs and hidden inconsistencies in WebAssembly runtimes. By extracting semantics from real-world WebAssembly binaries and generating complex, syntactically correct test cases, the framework successfully uncovered 33 unique bugs across popular Wasm runtimes.",keywords:["WebAssembly","Differential Testing","Runtime Bugs","Binary Generation","Semantic-aware Analysis"],paper_url:"https://arxiv.org/pdf/2312.10456",code_url:null,peer_reviewed:false},
+  {title:"Wasmati: An Efficient Static Vulnerability Scanner for WebAssembly",authors:["Tiago Brito","Nuno Santos"],year:2022,venue:"arXiv",description:"Presents Wasmati, a static analysis tool designed to find security vulnerabilities in WebAssembly binaries. By formally defining and generating a Code Property Graph (CPG) for WebAssembly, the tool can efficiently detect classical code vulnerabilities such as buffer overflows transferred from C/C++ during compilation.",keywords:["WebAssembly","Static Analysis","Vulnerability Scanning","Code Property Graph","CPG","Security"],paper_url:"https://arxiv.org/pdf/2204.12575",code_url:null,peer_reviewed:false},
+  {title:"WAFL: Binary-Only WebAssembly Fuzzing with Fast Snapshots",authors:["Keno Haßler","Dominik Maier"],year:2021,venue:"ROOTS 2021",description:"Presents WAFL, the first coverage-guided fuzzer for binary-only WebAssembly that operates without requiring source code. By patching the WAVM runtime to generate coverage data for AFL++ and utilizing lightweight VM snapshots instead of traditional forks, WAFL achieves fuzzing performance that can surpass native harnesses.",keywords:["Fuzzing","WebAssembly","AFL","Binary-Only","Software Security"],paper_url:"https://dl.acm.org/doi/10.1145/3503921.3503924",code_url:"https://github.com/fgsect/WAFL",peer_reviewed:true},
+  {title:"MSWasm: Soundly Enforcing Memory-Safe Execution of Unsafe Code",authors:["Alexandra E. Michael","Anitha Gollamudi","Jay Bosamiya","Craig Disselkoen","Aidan Denlinger","Conrad Watt","Bryan Parno","Marco Patrignani","Marco Vassena","Deian Stefan"],year:2026,venue:"arXiv",description:"Formalizes Memory-Safe WebAssembly (MSWasm), an extension that introduces language-level memory-safety abstractions to secure binaries compiled from unsafe languages like C and C++. Provides precise semantics for MSWasm and mathematically proves that well-typed programs are robustly memory-safe by construction.",keywords:["WebAssembly","Memory Safety","Formal Semantics","MSWasm","Software Security","C/C++"],paper_url:"https://arxiv.org/pdf/2208.13583",code_url:null,peer_reviewed:false},
+  {title:"BREWASM: A General Static Binary Rewriting Framework for WebAssembly",authors:["Shangtong Cao","Ningyu He","Yao Guo","Haoyu Wang"],year:2023,venue:"arXiv",description:"Presents BREWASM, the first general-purpose static binary rewriting framework designed specifically for WebAssembly. Addresses the inherent complexities of modifying Wasm binaries, such as strict static syntax verification and the tight coupling among binary sections.",keywords:["WebAssembly","Binary Rewriting","Static Analysis","Bytecode Modification"],paper_url:"https://arxiv.org/pdf/2305.01454",code_url:"https://github.com/security-pride/BREWasm",peer_reviewed:false},
+  {title:"CT-Wasm: Type-Driven Secure Cryptography for the Web Ecosystem",authors:["Conrad Watt","John Renner","Natalie Popescu","Sunjay Cauligi","Deian Stefan"],year:2019,venue:"PACMPL",description:"Introduces Constant-Time WebAssembly (CT-Wasm), a type-driven, strict extension to WebAssembly designed to facilitate the verifiably secure implementation of cryptographic algorithms. CT-Wasm's type system ensures code is both information flow secure and resistant to timing side-channel attacks.",keywords:["WebAssembly","Cryptography","Constant-Time Execution","Type Systems","Information Flow Security","Side-Channel Resistance"],paper_url:"https://dl.acm.org/doi/10.1145/3290390",code_url:null,peer_reviewed:true},
+  {title:"Everything Old is New Again: Binary Security of WebAssembly",authors:["Daniel Lehmann","Johannes Kinder","Michael Pradel"],year:2020,venue:"USENIX Security 2020",description:"Analyzes the extent to which vulnerabilities in memory-unsafe source languages remain exploitable when compiled to WebAssembly. Reveals that many classic vulnerabilities typically thwarted by common mitigations in native binaries are completely exposed in WebAssembly binaries, enabling unique attack vectors.",keywords:["WebAssembly","Binary Security","Vulnerability Analysis","Exploitation","Memory Safety"],paper_url:"https://www.usenix.org/system/files/sec20-lehmann.pdf",code_url:"https://github.com/sola-st/wasm-binary-security",peer_reviewed:true},
+  {title:"Characterizing and Detecting WebAssembly Runtime Bugs",authors:["Yixuan Zhang","Shangtong Cao","Haoyu Wang","Zhenpeng Chen","Xiapu Luo","Dongliang Mu","Yun Ma","Gang Huang","Xuanzhe Liu"],year:2023,venue:"ACM TOSEM",description:"Presents a systematic empirical study characterizing the nature of bugs found within WebAssembly runtimes, which frequently cause applications to crash. Analyzes root causes and manifestations of these bugs to improve the overall reliability of the WebAssembly ecosystem.",keywords:["WebAssembly","Runtime Bugs","Empirical Study","Bug Detection","Software Reliability"],paper_url:"https://dl.acm.org/doi/10.1145/3624743",code_url:null,peer_reviewed:true},
+  {title:"Security Risks of Porting C Programs to WebAssembly",authors:["Quentin Stiévenart","Coen De Roover","Mohammad Ghafari"],year:2021,venue:"arXiv",description:"Investigates the security implications of cross-compiling C programs to WebAssembly. By analyzing over 17,000 programs containing common vulnerabilities, demonstrates that executing these programs in WebAssembly frequently yields different results compared to native x86 execution due to differing standard library implementations and lack of security mitigations.",keywords:["WebAssembly","Security","Cross-compilation","Vulnerability Analysis","C/C++"],paper_url:"https://arxiv.org/pdf/2112.11745",code_url:null,peer_reviewed:false},
+  {title:"An Empirical Study of Real-World WebAssembly Binaries",authors:["Aaron Hilbig","Daniel Lehmann"],year:2021,venue:"WWW 2021",description:"A comprehensive empirical study analyzing 8,461 unique WebAssembly binaries gathered from source code repositories, package managers, and live websites. Reveals that two-thirds of binaries are compiled from memory-unsafe languages, 21% import potentially dangerous APIs, and cryptomining has dropped to less than 1% of web code.",keywords:["WebAssembly","Empirical Study","Binary Analysis","Security","Source Languages","Wasm Use Cases"],paper_url:"https://dl.acm.org/doi/epdf/10.1145/3442381.3450138",code_url:null,peer_reviewed:true},
+  {title:"WALMA: Learning to See Memory Corruption in WebAssembly",authors:["Oussama Draissi","Ahmad-Reza Sadeghi"],year:2026,venue:"arXiv",description:"Introduces WALMA, a framework for WebAssembly Linear Memory Attestation that utilizes machine learning to detect memory corruption and external tampering. Classifies memory snapshots using Convolutional Neural Networks (CNNs) to provide runtime integrity verification under an adversarial host model.",keywords:["WebAssembly","Memory Corruption","Machine Learning","Linear Memory Attestation","Security","CNN"],paper_url:"https://arxiv.org/pdf/2603.24167",code_url:null,peer_reviewed:false},
+  {title:"A Self-certifying Compilation Framework for WebAssembly",authors:["Kedar S. Namjoshi","Anton Xue"],year:2021,venue:"VMCAI 2021",description:"Describes a self-certifying compiler designed to generate a correctness proof for each optimization performed during compilation. The generated proofs are checked automatically by an independent proof validator, yielding formally verified compilation without formally verifying the compiler itself.",keywords:["WebAssembly","Self-Certifying Compiler","Formal Verification","Proof Validation","Optimization"],paper_url:"https://dl.acm.org/doi/abs/10.1007/978-3-030-67067-2_7",code_url:"https://github.com/nokia/web-assembly-self-certifying-compilation-framework",peer_reviewed:true},
+  {title:"EDGEDANCER: Secure Mobile WebAssembly Services on the Edge",authors:["Manuel Nieke","Lennart Almstedt","Rüdiger Kapitza"],year:2021,venue:"EdgeSys 2021",description:"Presents EDGEDANCER, a secure mobile edge computing platform that leverages WebAssembly to provide lightweight, portable, and provider-independent migration of edge services. Combines WebAssembly's sandboxing with trusted execution environments like Intel SGX to enable secure service relocation.",keywords:["WebAssembly","Edge Computing","Trusted Computing","Mobile Agents","Service Migration","SGX"],paper_url:"https://dl.acm.org/doi/10.1145/3434770.3459731",code_url:null,peer_reviewed:true},
+  {title:"WATZ: A Trusted WebAssembly Runtime Environment with Remote Attestation for TrustZone",authors:["Jämes Ménétrey","Marcelo Pasin","Pascal Felber","Valerio Schiavoni"],year:2022,venue:"ICDCS 2022",description:"Presents WATZ, a secure and efficient WebAssembly runtime for trusted execution within Arm's TrustZone TEE. Introduces a lightweight remote attestation system formally verified using Scyther and a WASI-RA extension enabling Wasm applications to securely manage remote attestation on IoT and edge devices.",keywords:["WebAssembly","TrustZone","Trusted Execution Environment","TEE","Remote Attestation","IoT","Edge Computing","WASI"],paper_url:"https://arxiv.org/pdf/2206.08722",code_url:"https://github.com/jamesmenetrey/unine-watz",peer_reviewed:true},
+  {title:"WBSan: WebAssembly Bug Detection for Sanitization and Binary-Only Fuzzing",authors:["Xiao Wu","Junzhou He","Liyan Huang","Cai Fu","Weihang Wang"],year:2025,venue:"WWW 2025",description:"Presents WBSan, the first WebAssembly binary sanitizer that utilizes static analysis and binary instrumentation to detect memory bugs and undefined behaviors without requiring source code or compile-time instrumentation.",keywords:["WebAssembly","Bug Detection","Binary-Only Fuzzing","Sanitization","Memory Safety","Undefined Behavior"],paper_url:"https://dl.acm.org/doi/10.1145/3696410.3714622",code_url:null,peer_reviewed:true},
+  {title:"CROW: Code Diversification for WebAssembly",authors:["Javier Cabrera Arteaga","Benoit Baudry","Orestis Floros"],year:2021,venue:"arXiv",description:"Presents CROW, the first fully automated open-source workflow for the diversification of WebAssembly binaries. Utilizes enumerative synthesis of diverse code snippets in the LLVM intermediate representation to generate variants for complex cryptographic libraries like libsodium.",keywords:["WebAssembly","Code Diversification","Security","LLVM","Cryptography","Software Resilience"],paper_url:"https://arxiv.org/pdf/2008.07185",code_url:null,peer_reviewed:false},
+  {title:"Compositional Information Flow Analysis for WebAssembly Programs",authors:["Quentin Stiévenart","Coen De Roover"],year:2020,venue:"SCAM 2020",description:"Proposes an automated, compositional static program analysis focused on information flow to address security concerns in WebAssembly programs. For every WebAssembly function, the analysis computes a summary describing where information from its parameters and global program state can flow.",keywords:["WebAssembly","Information Flow Analysis","Static Analysis","Compositional Analysis","Security"],paper_url:"https://soft.vub.ac.be/Publications/2020/vub-tr-soft-20-11.pdf",code_url:"https://github.com/acieroid/wassail/releases/tag/scam2020",peer_reviewed:true},
+  {title:"SELWasm: A Code Protection Mechanism for WebAssembly",authors:["Jian Sun","Dingyuan Cao","Ximing Liu","Ziyi Zhao","Wenwen Wang","Xiaoli Gong","Jin Zhang"],year:2019,venue:"IEEE ISPA 2019",description:"Proposes SELWasm, a framework designed to protect intellectual property embedded within WebAssembly binaries. Introduces mechanisms to secure complex business logic and algorithms executing in the browser from reuse or reverse engineering.",keywords:["WebAssembly","Code Protection","Intellectual Property","Security","Reverse Engineering"],paper_url:"https://ieeexplore.ieee.org/document/9047432",code_url:null,peer_reviewed:true},
+  {title:"Iris-MSWasm: Elucidating and Mechanising the Security Invariants of Memory-Safe WebAssembly",authors:["Maxime Legoupil","June Rousseau","Aïna Linn Georges","Jean Pichon-Pharabod","Lars Birkedal"],year:2024,venue:"OOPSLA 2024",description:"Formally validates the design of Memory-Safe WebAssembly (MSWasm) by developing MSWasmCert, a mechanisation in Coq, and Iris-MSWasm, a foundational reasoning framework based on separation logic. Explicitly defines and proves robust capability safety.",keywords:["WebAssembly","MSWasm","Memory Safety","Formal Verification","Separation Logic","Coq","Iris"],paper_url:"https://dl.acm.org/doi/10.1145/3689722",code_url:"https://github.com/logsem/MSWasm",peer_reviewed:true},
+  {title:"WANA: Symbolic Execution of Wasm Bytecode for Cross-Platform Smart Contract Vulnerability Detection",authors:["Dong Wang","Bo Jiang","W.K. Chan"],year:2020,venue:"arXiv",description:"Presents WANA, a cross-platform vulnerability detection tool for smart contracts that utilizes symbolic execution of WebAssembly bytecode. Establishes test oracles capable of identifying vulnerabilities in both EOSIO and Ethereum smart contracts.",keywords:["WebAssembly","Symbolic Execution","Smart Contracts","Vulnerability Detection","EOSIO","Ethereum","Blockchain"],paper_url:"https://arxiv.org/abs/2007.15510",code_url:"https://github.com/gongbell/WANA",peer_reviewed:false},
+  {title:"Avengers, Assemble! Survey of WebAssembly Security Solutions",authors:["Minseo Kim","Hyerean Jang","Youngjoo Shin"],year:2022,venue:"IEEE CLOUD 2022",description:"A comprehensive survey examining the security vulnerabilities and corresponding defense mechanisms associated with WebAssembly. Analyzes how native execution speeds have attracted cryptojacking abuses and how support for type-unsafe languages introduces memory bugs.",keywords:["WebAssembly","Security","Survey","Cloud Computing","Vulnerability Analysis","Cryptojacking","Memory Bugs"],paper_url:"https://ieeexplore.ieee.org/document/9860829",code_url:null,peer_reviewed:true},
+  {title:"WASHADOW: Protecting WebAssembly Memory Through VM-Aware Shadow Memory",authors:["Zhuochen Jiang","Baojian Hua"],year:2024,venue:"IEEE TrustCom 2024",description:"Presents WASHADOW, an approach designed to protect WebAssembly applications from memory corruption and integer overflow vulnerabilities by utilizing virtual machine-aware shadow memory. Enforces protection mechanisms directly at the runtime level without relying on heavy binary instrumentation.",keywords:["WebAssembly","Memory Protection","Shadow Memory","Virtual Machine","Security","Memory Corruption"],paper_url:"https://ieeexplore.ieee.org/document/10945011",code_url:null,peer_reviewed:true},
+  {title:"WASMSEPA: Effectively Protecting WebAssembly Through Privilege Separation",authors:["Zhuochen Jiang","Baojian Hua"],year:2025,venue:"IEEE QRS 2025",description:"Presents WASMSEPA, a novel approach to effectively protect WebAssembly execution by enforcing privilege separation. Isolates WebAssembly binaries from unsafe functions by executing them in separate processes, thus upholding Wasm's intended security guarantees.",keywords:["WebAssembly","Privilege Separation","Security","Process Isolation","Vulnerability Protection"],paper_url:"https://ieeexplore.ieee.org/abstract/document/11173483",code_url:null,peer_reviewed:true},
+  {title:"POSTER: Detecting WebAssembly-based Cryptocurrency Mining",authors:["Weikang Bian","Wei Meng","Yi Wang"],year:2019,venue:"ACM CCS 2019",description:"Proposes a novel browser-based methodology to detect in-browser WebAssembly-based cryptojacking. Demonstrates that cryptocurrency mining programs exhibit distinctly different execution patterns compared to benign Wasm applications by leveraging dynamic Wasm instruction execution traces.",keywords:["WebAssembly","Cryptojacking","Cryptocurrency Mining","Dynamic Analysis","Browser Security"],paper_url:"https://dl.acm.org/doi/10.1145/3319535.3363287",code_url:null,peer_reviewed:true},
+  {title:"Fuzzm: Finding Memory Bugs through Binary-Only Instrumentation and Fuzzing of WebAssembly",authors:["Daniel Lehmann","Martin Toldam Torp"],year:2021,venue:"arXiv",description:"Introduces Fuzzm, the first binary-only fuzzer for WebAssembly, designed to detect memory vulnerabilities such as overflows and underflows. Combines canary instrumentation, coverage instrumentation, a WebAssembly VM, and AFL's input generation algorithm.",keywords:["WebAssembly","Fuzzing","Binary Analysis","Vulnerability Detection","Memory Safety","Canary Instrumentation"],paper_url:"https://arxiv.org/abs/2110.15433",code_url:null,peer_reviewed:false},
+  {title:"metaSafer: A Technique to Detect Heap Metadata Corruption in WebAssembly",authors:["Suhyeon Song","Seonghwan Park","Donghyun Kwon"],year:2023,venue:"IEEE Access",description:"Presents metaSafer, a technique designed to detect heap metadata corruption in WebAssembly applications. Addresses the critical need to monitor and detect tampering with heap metadata during runtime execution in lightweight web services.",keywords:["WebAssembly","Heap Metadata","Memory Corruption","Security","Vulnerability Detection"],paper_url:"https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10296897",code_url:null,peer_reviewed:true},
+  {title:"VMCANARY: Effective Memory Protection for WebAssembly via VM-assisted Approach",authors:["Ziyao Zhang","Wenlong Zheng","Baojian Hua","Qiliang Fan","Zhizhong Pan"],year:2023,venue:"IEEE QRS 2023",description:"Presents VMCANARY, a framework designed to protect WebAssembly linear memory from buffer overflow vulnerabilities using a canary-based approach with VM assistance, providing effective memory safety guarantees without heavy binary instrumentation.",keywords:["WebAssembly","Memory Protection","Buffer Overflow","Security","Virtual Machine","Canary"],paper_url:"https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10366728",code_url:null,peer_reviewed:true},
+  {title:"Memory Safety Preservation for WebAssembly",authors:["Marco Vassena"],year:2019,venue:"arXiv",description:"Investigates the preservation of memory safety when compiling high-level languages to WebAssembly. Formalizes memory safety as hypersafety properties to establish secure compilation criteria, aiming to prevent classical memory vulnerabilities from compromising the Wasm sandbox.",keywords:["WebAssembly","Memory Safety","Secure Compilation","Security","Hypersafety Properties","Sandboxing"],paper_url:"https://arxiv.org/abs/1910.09586",code_url:null,peer_reviewed:false},
+  {title:"WASSAIL: a WebAssembly Static Analysis Library",authors:["Quentin Stiévenart"],year:2021,venue:"ProWeb 2021",description:"Introduces WASSAIL, a static analysis library for WebAssembly designed to facilitate the development of various static analyses by providing essential building blocks such as control-flow graph construction and dataflow analysis capabilities.",keywords:["WebAssembly","Static Analysis","WASSAIL","Program Analysis","Control-Flow Graphs"],paper_url:null,code_url:"https://github.com/acieroid/wassail",peer_reviewed:true},
+  {title:"WasmA: A Static WebAssembly Analysis Framework for Everyone",authors:["Florian Breitfelder","Tobias Roth","Lars Baumgärtner","Mira Mezini"],year:2023,venue:"IEEE SANER 2023",description:"Introduces WasmA, a generic and extensible static analysis framework for WebAssembly designed to compute essential foundational structures like call graphs, control-flow graphs, and data-flow graphs. Implements a cryptomining detection tool showing high competitiveness with state-of-the-art tools.",keywords:["WebAssembly","Static Analysis","Control-Flow Graph","Data-Flow Graph","Cryptomining Detection","Security"],paper_url:"https://ieeexplore.ieee.org/document/10123627",code_url:null,peer_reviewed:true},
+  {title:"A Comprehensive Trusted Runtime for WebAssembly with Intel SGX (TWINE)",authors:["Jämes Ménétrey","Marcelo Pasin","Pascal Felber","Valerio Schiavoni","Giovanni Mazzeo","Arne Hollum","Darshan Vaydia"],year:2023,venue:"IEEE TDSC",description:"Presents TWINE, a trusted runtime for executing WebAssembly-compiled applications within Intel SGX TEEs, establishing a secure two-way sandbox. Leverages WebAssembly's memory safety guarantees and extends WASI to facilitate secure execution of legacy and language-agnostic applications.",keywords:["WebAssembly","Intel SGX","Trusted Execution Environment","Security","Sandboxing","WASI","TWINE"],paper_url:"https://arxiv.org/pdf/2312.09087",code_url:null,peer_reviewed:true},
+  {title:"WASAI: Uncovering Vulnerabilities in Wasm Smart Contracts",authors:["Weimin Chen","Xiapu Luo","Zihan Sun","Haipeng Cai"],year:2022,venue:"ISSTA 2022",description:"Presents WASAI, a novel concolic fuzzer designed to uncover vulnerabilities in WebAssembly smart contracts deployed on blockchains such as EOSIO. Effectively identifies vulnerabilities through advanced concolic execution, addressing limitations like low code coverage and accuracy in existing tools.",keywords:["WebAssembly","Smart Contracts","Fuzzing","Concolic Execution","Vulnerability Detection","Blockchain","Security"],paper_url:"https://dl.acm.org/doi/10.1145/3533767.3534218",code_url:null,peer_reviewed:true},
+  {title:"Aerogel: Lightweight Access Control for WebAssembly-Based Bare-Metal IoT Devices",authors:["Renju Liu","Luis Garcia","Mani Srivastava"],year:2021,venue:"IEEE/ACM SEC 2021",description:"Presents AEROGEL, a lightweight access control framework for WebAssembly-based bare-metal IoT devices. Addresses security challenges of migrating Wasm to MMU-less IoT architectures, providing robust access control for sensors, actuators, memory, and processor energy usage.",keywords:["WebAssembly","IoT","Access Control","Bare-Metal","Edge Computing","Security"],paper_url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC10512427/pdf/nihms-1839084.pdf",code_url:null,peer_reviewed:true},
+  {title:"Put Your Memory in Order: Efficient Domain-based Memory Isolation for WASM (PKUWA)",authors:["Hanwen Lei","Ziqi Zhang","Shaokun Zhang","Peng Jiang","Zhineng Zhong","Ningyu He","Ding Li","Yao Guo","Xiangqun Chen"],year:2023,venue:"ACM CCS 2023",description:"Presents PKUWA, a WebAssembly runtime providing efficient memory isolation using Memory Protection Keys (MPK) hardware. Introduces Domain Isolated Linear Memory (DILM), enabling function-level memory protection and preventing heap-based buffer overflows from compromising sensitive data.",keywords:["WebAssembly","Memory Isolation","Memory Protection Keys","MPK","Sandboxing","Buffer Overflow","Security"],paper_url:"https://dl.acm.org/doi/10.1145/3576915.3623205",code_url:"https://github.com/PKU-ASAL/PKUWA",peer_reviewed:true},
+  {title:"The Security Risk of Lacking Compiler Protection in WebAssembly",authors:["Quentin Stiévenart","Mohammad Ghafari","Coen De Roover"],year:2021,venue:"arXiv",description:"Investigates the security implications of compiling C programs to WebAssembly, specifically examining whether standard compiler protections are preserved. Demonstrates that the absence of stack canaries leaves Wasm applications susceptible to exploits that would typically crash in native x86 environments.",keywords:["WebAssembly","Security","Compiler Protection","Buffer Overflow","Stack Canaries","Vulnerability Analysis"],paper_url:"https://arxiv.org/pdf/2111.01421",code_url:null,peer_reviewed:false},
+  {title:"Defending Buffer Overflows in WebAssembly: A Transpiler Approach",authors:["Weiqi Feng"],year:2026,venue:"arXiv",description:"Proposes a methodology and a WebAssembly transpiler to prevent buffer overflows within the unmanaged memory of the WebAssembly runtime. The transpiler automatically injects stack canaries and implements Address Space Layout Randomization (ASLR) to mitigate susceptibility to buffer overflow attacks.",keywords:["WebAssembly","Buffer Overflow","Security","Transpiler","Stack Canaries","ASLR"],paper_url:"https://arxiv.org/pdf/2604.03859",code_url:null,peer_reviewed:false},
+  {title:"An Analysis of Modern Web Security Vulnerabilities Inside WebAssembly Applications",authors:["Lorenzo Corrias","Lorenzo Pisu","Davide Maiorca","Giorgio Giacinto"],year:2026,venue:"arXiv",description:"Demonstrates how low-level binary vulnerabilities within WebAssembly modules such as buffer overflows and use-after-free errors can be exploited to trigger common web security flaws like SQL Injections, SSTI, and XS-Leaks.",keywords:["WebAssembly","Software Security","Web Security","Buffer Overflow","SQL Injection","SSTI","XS-Leaks"],paper_url:"https://arxiv.org/pdf/2603.09426",code_url:"https://anonymous.4open.science/r/wasm-pocs/",peer_reviewed:false},
+  {title:"Position Paper: Progressive Memory Safety for WebAssembly (MS-Wasm)",authors:["Craig Disselkoen","John Renner","Tal Garfinkel","Amit Levy"],year:2019,venue:"HASP 2019",description:"Introduces MS-Wasm, an extension to WebAssembly designed to capture low-level C/C++ memory semantics at compile time. Enables runtime compilers and JIT engines to leverage advanced hardware features to detect and prevent classic memory vulnerabilities.",keywords:["WebAssembly","Memory Safety","C/C++","Vulnerability Mitigation","MS-Wasm","Security"],paper_url:"https://dl.acm.org/doi/pdf/10.1145/3337167.3337171",code_url:null,peer_reviewed:true},
+  {title:"Bringing Binary Exploitation at Port 80: Understanding C Vulnerabilities in WebAssembly",authors:["Enrico Massidda","Lorenzo Pisu","Davide Maiorca","Giorgio Giacinto"],year:2024,venue:"SECRYPT 2024",description:"Investigates the viability of classic C-style binary exploitation within the WebAssembly ecosystem. Demonstrates how traditional memory corruption vulnerabilities can still be leveraged for data-only attacks and control-flow hijacking, bridging low-level exploitation and web security.",keywords:["WebAssembly","Binary Exploitation","Memory Safety","Web Security","Buffer Overflow","Use-After-Free"],paper_url:"https://www.scitepress.org/publishedPapers/2024/128524/pdf/index.html",code_url:null,peer_reviewed:true},
+  {title:"AccTEE: A WebAssembly-based Two-way Sandbox for Trusted Resource Accounting",authors:["David Goltzsche","Manuel Nieke","Thomas Knauth","Rüdiger Kapitza"],year:2019,venue:"Middleware 2019",description:"Presents AccTEE, a two-way sandbox designed to provide trusted resource accounting for remote computations. Combines hardware-protected TEEs with WebAssembly, using automated code instrumentation to securely track and limit resource usage while maintaining confidentiality and integrity.",keywords:["WebAssembly","Trusted Execution Environments","Intel SGX","Resource Accounting","Sandboxing","Cloud Computing"],paper_url:"https://dl.acm.org/doi/10.1145/3361525.3361541",code_url:null,peer_reviewed:true},
+  {title:"WEST: Specification-Based Test Generation for WebAssembly",authors:["Dongjun Youn","Wonho Shin","Sukyoung Ryu"],year:2025,venue:"ASE 2025",description:"Introduces WEST, a specification-based test generation framework designed to automatically produce WebAssembly test cases from mechanized specifications written in SpecTec. Enables scalable and automated conformance testing across various Wasm engine implementations.",keywords:["WebAssembly","Test Generation","Formal Specification","SpecTec","Conformance Testing"],paper_url:"https://ieeexplore.ieee.org/abstract/document/11334667",code_url:null,peer_reviewed:true},
+  {title:"Swivel: Hardening WebAssembly against Spectre",authors:["Shravan Narayan","Craig Disselkoen","Daniel Moghimi","Sunjay Cauligi","Evan Johnson","Zhao Gang","Anjo Vahldiek-Oberwagner","Ravi Sahita","Hovav Shacham","Dean Tullsen","Deian Stefan"],year:2021,venue:"USENIX Security 2021",description:"Presents Swivel, a compiler framework designed to harden WebAssembly against Spectre attacks. Ensures malicious code cannot use speculative execution to break out of the Wasm sandbox, offering both software-only and hardware-assisted designs.",keywords:["WebAssembly","Spectre","Sandboxing","Side-Channel Attacks","Security","Compiler Framework","FaaS"],paper_url:"https://www.usenix.org/system/files/sec21-narayan.pdf",code_url:"https://github.com/PLSysSec/swivel",peer_reviewed:true},
+  {title:"WASMixer: Binary Obfuscation for WebAssembly",authors:["Shangtong Cao","Ningyu He","Yao Guo","Haoyu Wang"],year:2023,venue:"arXiv",description:"Presents WASMixer, the first general-purpose binary obfuscation framework for WebAssembly. Implements novel techniques including on-demand string decryption, data-level obfuscation targeting string literals and function names, and code-level obfuscation targeting instructions and control flow.",keywords:["WebAssembly","Binary Obfuscation","Security","Reverse Engineering","Control Flow"],paper_url:"https://arxiv.org/abs/2308.03123",code_url:"https://github.com/security-pride/WASMixer",peer_reviewed:false},
+  {title:"Wapplique: Testing WebAssembly Runtime via Execution Context-Aware Bytecode Mutation",authors:["Wenxuan Zhao","Ruiying Zeng"],year:2024,venue:"ISSTA 2024",description:"Introduces Wapplique, the first WebAssembly bytecode mutation-based fuzzing tool to test the reliability of Wasm runtimes. Extracts code fragments from real-world programs and uses sophisticated code analysis to ensure the validity of mutated bytecode. Uncovered 20 previously unknown bugs.",keywords:["WebAssembly","Fuzzing","Runtime Testing","Bytecode Mutation","Security","Reliability"],paper_url:"https://dl.acm.org/doi/10.1145/3650212.3680340",code_url:null,peer_reviewed:true},
+  {title:"AndroWasm: Empirical Study on Android Malware Obfuscation through WebAssembly",authors:["Diego Soi","Silvia Lucia Sanna","Lorenzo Pisu","Leonardo Regano","Giorgio Giacinto"],year:2026,venue:"arXiv",description:"Investigates the use of WebAssembly as a novel obfuscation technique for Android malware. Demonstrates that attackers can embed malicious payloads within Wasm to effectively evade traditional static analysis, signature-matching, and state-of-the-art detection tools like VirusTotal and MobSF.",keywords:["WebAssembly","Android Malware","Obfuscation","Evasion","Security","Static Analysis"],paper_url:"https://arxiv.org/pdf/2602.18082",code_url:null,peer_reviewed:false},
+  {title:"WASMaker: Differential Testing of WebAssembly Runtimes via Semantic-Aware Binary Generation",authors:["Shangtong Cao","Yixuan Zhang","Ningyu He","Mu Zhang"],year:2024,venue:"ISSTA 2024",description:"Presents WASMaker, a differential testing framework to automatically generate complicated WebAssembly test cases by disassembling and reassembling real-world Wasm binaries. Employs a runtime-agnostic root cause location method to accurately pinpoint the source of bugs.",keywords:["WebAssembly","Differential Testing","Runtime Security","Binary Generation","Fuzzing","WASMaker"],paper_url:"https://dl.acm.org/doi/10.1145/3650212.3680358",code_url:"https://github.com/security-pride/WASMaker",peer_reviewed:true},
+  {title:"JABBERWOCK: A Tool for WebAssembly Dataset Generation and Malicious Website Detection",authors:["Chika Komiya","Naoto Yanai","Kyosuke Yamashita","Shingo Okamura"],year:2024,venue:"IPSJ JIP",description:"Introduces JABBERWOCK, a tool designed to automatically generate large-scale WebAssembly datasets by gathering real-world JavaScript code and converting it into Wasm. Demonstrates that generated datasets can effectively train models for malicious website detection.",keywords:["WebAssembly","Dataset Generation","Malicious Website Detection","Machine Learning","JavaScript","Security"],paper_url:"https://www.jstage.jst.go.jp/article/ipsjjip/32/0/32_298/_pdf",code_url:"https://github.com/c-chocolate/Jabberwock",peer_reviewed:true},
+  {title:"WADIFF: A Differential Testing Framework for WebAssembly Runtimes",authors:["Shiyao Zhou","Muhui Jiang","Weimin Chen","Hao Zhou","Haoyu Wang","Xiapu Luo"],year:2023,venue:"IEEE ASE 2023",description:"Introduces WADIFF, a differential testing framework to evaluate the correctness and reliability of WebAssembly runtimes. Applied to seven popular WebAssembly runtimes, WADIFF successfully identified hundreds of instruction-level inconsistencies.",keywords:["WebAssembly","Differential Testing","Runtime Verification","Fuzzing","Security","Reliability"],paper_url:"https://dl.acm.org/doi/pdf/10.1109/ASE56229.2023.00188",code_url:null,peer_reviewed:true},
+  {title:"SYMGX: Detecting Cross-boundary Pointer Vulnerabilities of SGX Applications",authors:["Yuanpeng Wang","Zhineng Zhong","Ding Li","Ziqi Zhang","Shengjian Guo","Yao Guo","Ningyu He","Qinkun Bao","Xiangqun Chen"],year:2023,venue:"ACM CCS 2023",description:"Introduces SYMGX, a symbolic execution-based vulnerability detector for identifying cross-boundary pointer vulnerabilities in Intel SGX applications. Developed the GSTG-CAP model to accurately simulate multi-entry arbitrary-order execution. Successfully uncovered 30 zero-day vulnerabilities.",keywords:["Intel SGX","Symbolic Execution","Vulnerability Detection","Cross-boundary Pointers","Security"],paper_url:"https://dl.acm.org/doi/10.1145/3576915.3623213",code_url:"https://github.com/PKU-ASAL/WASEM",peer_reviewed:true},
+  {title:"ESFuzzer: An Efficient Way to Fuzz WebAssembly Interpreter",authors:["Jideng Han","Zhaoxin Zhang","Yuejin Du","Wei Wang","Xiuyuan Chen"],year:2024,venue:"Electronics",description:"Presents ESFuzzer, an efficient fuzzing tool for identifying vulnerabilities in WebAssembly interpreters. Employs an Equivalent-Statement concept and a Stack Repair Algorithm to generate 100% valid WebAssembly test cases, significantly improving code coverage.",keywords:["WebAssembly","Fuzzing","Interpreter","Security","Vulnerability Detection"],paper_url:"https://www.mdpi.com/2079-9292/13/8/1498",code_url:null,peer_reviewed:true},
+  {title:"Automated WebAssembly Function Purpose Identification With Semantics-Aware Analysis",authors:["Alan Romano","Weihang Wang"],year:2023,venue:"WWW 2023",description:"Introduces WASPur, an automated tool designed to identify the purposes of WebAssembly functions. Constructs semantics-aware intermediate representations for functions and utilizes a machine learning classifier to predict function similarity.",keywords:["WebAssembly","Semantics-Aware Analysis","Machine Learning","Function Purpose Identification"],paper_url:"https://dl.acm.org/doi/pdf/10.1145/3543507.3583235",code_url:null,peer_reviewed:true},
+  {title:"A First Look at Code Obfuscation for WebAssembly",authors:["Shrenik Bhansali","Ahmet Aris","Abbas Acar","Harun Oz","A. Selcuk Uluagac"],year:2022,venue:"WiSec 2022",description:"Provides the first comprehensive investigation into code obfuscation techniques specifically targeting WebAssembly. Evaluates feasibility of numerous obfuscation techniques applied to Wasm programs and their potential to circumvent static analysis-based detection systems.",keywords:["WebAssembly","Code Obfuscation","Security","Malware","Static Analysis","Cryptojacking"],paper_url:"https://dl.acm.org/doi/pdf/10.1145/3507657.3528560",code_url:null,peer_reviewed:true},
+  {title:"MINOS: A Lightweight Real-Time Cryptojacking Detection System",authors:["Faraz Naseem","Ahmet Aris","Leonardo Babun","Ege Tekiner","A. Selcuk Uluagac"],year:2021,venue:"NDSS 2021",description:"Introduces MINOS, an extremely lightweight, real-time system to detect WebAssembly-based cryptojacking malware. Converts Wasm binaries into grayscale images and applies deep learning-based image classification to distinguish benign applications from unauthorized mining routines.",keywords:["WebAssembly","Cryptojacking","Malware Detection","Deep Learning","Security","Image-based Classification"],paper_url:"https://www.researchgate.net/publication/349109071_MINOS_A_Lightweight_Real-Time_Cryptojacking_Detection_System",code_url:null,peer_reviewed:true},
+  {title:"Madvex: Instrumentation-based Adversarial Attacks on ML Malware Detection",authors:["Nils Loose","Felix Mächtle","Claudius Pott","Volodymyr Bezsmertnyi","Thomas Eisenbarth"],year:2023,venue:"DIMVA 2023",description:"Introduces Madvex, a novel approach to crafting adversarial examples within WebAssembly binaries to evade machine learning-based malware detection. Demonstrates how to use binary instrumentation to insert semantic-preserving gadgets, successfully bypassing detection systems like MINOS.",keywords:["WebAssembly","Malware Detection","Adversarial Attacks","Cryptojacking","Binary Instrumentation","Machine Learning Security"],paper_url:"https://arxiv.org/abs/2305.02559",code_url:null,peer_reviewed:true},
+  {title:"WASM-MUTATE: Fast and Effective Binary Diversification for WebAssembly",authors:["Javier Cabrera-Arteaga","Nicholas Fitzgerald","Martin Monperrus","Benoit Baudry"],year:2023,venue:"arXiv",description:"Introduces WASM-MUTATE, a fast and effective binary diversification engine for WebAssembly. Utilizes an e-graph data structure and applies semantic-preserving binary rewriting rules to rapidly generate thousands of functionally identical but behaviorally diverse WebAssembly variants.",keywords:["WebAssembly","Binary Diversification","Security","Side-Channel Attacks","Spectre","Program Transformation"],paper_url:"https://arxiv.org/abs/2309.07638",code_url:null,peer_reviewed:false},
+  {title:"Wasm-R3: Record-Reduce-Replay for Realistic and Standalone WebAssembly Benchmarks",authors:["Doehyun Baek","Jakob Getz","Yusung Sim","Daniel Lehmann","Ben L. Titzer","Sukyoung Ryu","Michael Pradel"],year:2024,venue:"arXiv",description:"Introduces Wasm-R3, a novel record-and-replay technique to create realistic and standalone WebAssembly benchmarks. Transparently instruments Wasm modules to record execution traces, then aggressively optimizes these traces by over 99% to generate faithful standalone replay modules.",keywords:["WebAssembly","Benchmarking","Record and Replay","Program Analysis","Execution Traces"],paper_url:"https://arxiv.org/abs/2409.00708",code_url:"https://github.com/sola-st/wasm-r3",peer_reviewed:false},
+  {title:"Finding the Dwarf: Recovering Precise Types from WebAssembly Binaries",authors:["Daniel Lehmann","Michael Pradel"],year:2022,venue:"PLDI 2022",description:"Presents SnowWhite, a machine learning-based approach to recover precise, high-level parameter and return types from compiled WebAssembly binaries. Frames type recovery as a neural sequence-to-sequence prediction task. Evaluated on over 6.3 million type samples.",keywords:["WebAssembly","Type Prediction","Type Recovery","Reverse Engineering","Machine Learning","Neural Networks"],paper_url:"https://dl.acm.org/doi/10.1145/3519939.3523449",code_url:null,peer_reviewed:true},
+  {title:"Towards Least-Privilege WebAssembly Applications",authors:["Olav Blaak","Tom Van Cutsem"],year:2026,venue:"Programming 2026",description:"Addresses supply chain security risks in the WebAssembly Component Model by introducing a transparent, language-agnostic framework for enforcing the principle of least privilege. Developed a method to interpose arbitrary logic at component boundaries by automatically wrapping them.",keywords:["WebAssembly","Component Model","Security","WASI","Principle of Least Privilege","Supply Chain Attacks","Sandboxing"],paper_url:"https://dl.acm.org/doi/10.1145/3801119.3801125",code_url:null,peer_reviewed:true},
+  {title:"Wobfuscator: Obfuscating JavaScript Malware via Opportunistic Translation to WebAssembly",authors:["Alan Romano","Daniel Lehmann","Michael Pradel","Weihang Wang"],year:2022,venue:"IEEE S&P 2022",description:"Presents Wobfuscator, the first technique to evade static JavaScript malware detection by opportunistically translating carefully selected parts of malicious JavaScript behavior into WebAssembly. Demonstrates that state-of-the-art static analysis tools struggle to detect the resulting mixed-language applications.",keywords:["WebAssembly","JavaScript","Malware Evasion","Obfuscation","Security","Static Analysis"],paper_url:"https://ieeexplore.ieee.org/document/9833626",code_url:"https://github.com/js2wasm-obfuscator/translator",peer_reviewed:true},
+  {title:"Deceptive bytes: In-depth Evaluation of WebAssembly Obfuscation for Evading Crypto Mining Detection",authors:["Håkon Harnes"],year:2023,venue:"NTNU Master's Thesis",description:"A comprehensive evaluation of code obfuscation techniques for WebAssembly and their effectiveness in evading drive-by cryptomining detection. Applies obfuscation across multiple abstraction levels including C source code, LLVM bitcode, and compiled WebAssembly binaries.",keywords:["WebAssembly","Obfuscation","Cryptojacking","Malware Evasion","Security","Cryptomining"],paper_url:null,code_url:"https://github.com/HakonHarnes/wasm-obf",peer_reviewed:false},
+  {title:"The WASM Cloak: Evaluating Browser Fingerprinting Defenses Under WebAssembly Obfuscation",authors:["AHM Nazmus Sakib","Mahsin Bin Akram","Joseph Spracklen","Sahan Kalutarage","Raveen Wijewickrama","Igor Bilogrevic","Murtuza Jadliwala"],year:2025,venue:"arXiv",description:"Presents the first systematic evaluation of how WebAssembly-based obfuscation impacts the robustness of modern browser fingerprinting defenses. Demonstrates that feature-based source code detectors show moderate vulnerability while API-level interception methods remain completely effective.",keywords:["WebAssembly","Browser Fingerprinting","Obfuscation","Privacy","Security","Evasion"],paper_url:"https://arxiv.org/abs/2508.21219",code_url:null,peer_reviewed:false},
+  {title:"WasmWalker: Path-based Code Representations for Improved WebAssembly Program Analysis",authors:["Mohammad Robati Shirzad","Patrick Lam"],year:2024,venue:"arXiv",description:"Introduces WasmWalker, a novel approach to generate path-based code representations for WebAssembly binaries to enhance deep learning-based program analysis. Discovers a surprisingly finite set of unique AST paths, proposing two new code representations.",keywords:["WebAssembly","Program Analysis","Abstract Syntax Tree","Deep Learning","Code Representation","Embeddings"],paper_url:"https://arxiv.org/abs/2410.08517",code_url:null,peer_reviewed:false},
+  {title:"EVulHunter: Detecting Fake Transfer Vulnerabilities for EOSIO's Smart Contracts at Webassembly-level",authors:["Lijin Quan","Lei Wu","Haoyu Wang"],year:2019,venue:"arXiv",description:"Proposes EVulHunter, a static analysis tool designed to automatically detect fake transfer vulnerabilities in EOSIO smart contracts directly at the WebAssembly level. Addresses the critical need to analyze Wasm bytecode directly as most EOSIO smart contracts are closed-source.",keywords:["WebAssembly","EOSIO","Smart Contracts","Vulnerability Detection","Fake Transfer","Static Analysis"],paper_url:"https://arxiv.org/abs/1906.10362",code_url:"https://github.com/EVulHunter/EVulHunter",peer_reviewed:false},
+  {title:"SecWasm: Information Flow Control for WebAssembly",authors:["Iulia Bastys","Maximilian Algehed","Alexander Sjösten","Andrei Sabelfeld"],year:2022,venue:"ESORICS 2022",description:"Introduces SecWasm, the first general-purpose information-flow control system for WebAssembly. Developed a hybrid system to enforce termination-insensitive noninterference, ensuring applications manipulate sensitive data securely and are protected against unauthorized information leaks.",keywords:["WebAssembly","Information Flow Control","Noninterference","Security","Hybrid Type System"],paper_url:"https://dl.acm.org/doi/10.1007/978-3-031-22308-2_5",code_url:"https://github.com/womeier/secwasm",peer_reviewed:true},
+  {title:"WAGEN: Detecting WebAssembly Runtime Bugs With Grammar-Guided Program Mutation",authors:["Xinyi Lu","Zhide Zhou","Xiaochen Li","Jifeng Xuan","Hao Wu","He Jiang","Zhilei Ren"],year:2025,venue:"IEEE Trans. Reliability",description:"Presents WAGEN, a grammar-guided program mutation approach to improve the fuzz testing of WebAssembly runtimes. Applies custom mutation rules to syntax trees while utilizing Markov Chain Monte Carlo sampling guided by coverage information.",keywords:["WebAssembly","Fuzzing","Runtime Bugs","Grammar-Guided Mutation","Differential Testing"],paper_url:"https://ieeexplore.ieee.org/document/11205981",code_url:null,peer_reviewed:true},
+  {title:"WASMEYE: Language- and Platform-Independent Anomaly Detection for WebAssembly",authors:["Arne Vogel","Timothée Glörfeld","Alexander Szekely-Schenker","Thomas Trenner","Rene Ermler","Rüdiger Kapitza"],year:2025,venue:"Middleware 2025",description:"Presents WASMEYE, a platform- and source language-independent anomaly detection system for WebAssembly. Integrates ensemble learning directly into WebAssembly modules to protect systems from bugs and malicious code.",keywords:["WebAssembly","Anomaly Detection","Ensemble Learning","Security","Platform-Independent"],paper_url:"https://dl.acm.org/doi/pdf/10.1145/3721462.3730957",code_url:null,peer_reviewed:true},
+  {title:"Lurking Eyes: Detecting Side-Channel Attacks on JavaScript and WebAssembly",authors:["Mohammad Erfan Mazaheri","Farhad Taheri","Siavash Bayat Sarmadi"],year:2020,venue:"ISCISC 2020",description:"Proposes a method to detect remote timing side-channel attacks, particularly cache attacks, executed through JavaScript and WebAssembly. Presents a detection-oriented approach to identify microarchitectural attacks without severely restricting web functionality.",keywords:["WebAssembly","JavaScript","Side-Channel Attacks","Cache Attacks","Timing Attacks","Security","Detection"],paper_url:"https://ieeexplore.ieee.org/document/9261920",code_url:null,peer_reviewed:true},
+  {title:"FreeWavm: Enhanced WebAssembly Runtime Fuzzing via Parse Tree Mutation and Snapshot",authors:["Peng Qian","Xinlei Ying","Jiashui Wang","Long Liu","Lun Zhang","Jianhai Chen","Qinming He"],year:2025,venue:"ISSTA 2025",description:"Introduces FREEWAVM, a novel fuzzing framework for detecting vulnerabilities in WebAssembly runtimes. Transforms WebAssembly bytecode into a parse tree format and employs structure-aware mutation with automated repair mechanisms. Identified 69 previously unknown bugs, 24 assigned CVEs.",keywords:["WebAssembly","Fuzzing","Runtime Security","Parse Tree Mutation","Bug Finding","Snapshot"],paper_url:"https://dl.acm.org/doi/10.1145/3728877",code_url:"https://github.com/messi-q/FreeWavm",peer_reviewed:true},
+  {title:"Wemby's Web: Hunting for Memory Corruption in WebAssembly",authors:["Oussama Draissi","Tobias Cloosters","David Klein","Michael Rodler","Marius Musch","Martin Johns","Lucas Davi"],year:2025,venue:"ISSTA 2025",description:"Presents the first systematic analysis of memory corruption vulnerabilities in WebAssembly and introduces Wemby, a framework to holistically analyze WebAssembly-powered websites. Reveals how memory corruption in Wasm can be leveraged to achieve XSS by manipulating trusted host data within untrusted linear memory.",keywords:["WebAssembly","Memory Corruption","Taint-tracking","Fuzzing","Security","Cross-Site Scripting","XSS"],paper_url:"https://dl.acm.org/doi/10.1145/3728937",code_url:"https://github.com/uni-due-syssec/wemby",peer_reviewed:true},
+  {title:"FP-tracer: Fine-grained Browser Fingerprinting Detection via Taint-tracking",authors:["Soumaya Boussaha","Lukas Hock","Rubén Cuevas Rumin","Angel Cuevas Rumin","Martin Johns","Luca Compagna","Thomas Barber"],year:2024,venue:"PoPETs 2024",description:"Presents FP-tracer, a methodology to detect and classify browser fingerprinters using dynamic taint tracking and joint entropy classification. Tracks data flows across 62 sources and 25 sinks. Highlights the need to extend analysis to WebAssembly.",keywords:["Browser Fingerprinting","Privacy","Taint Tracking","Entropy","Web Security","WebAssembly"],paper_url:"https://petsymposium.org/popets/2024/popets-2024-0092.pdf",code_url:"https://github.com/soumboussaha/FP-tracer",peer_reviewed:true},
+  {title:"Multi-modal Learning for WebAssembly Reverse Engineering (WasmRev)",authors:["Hanxian Huang","Jishen Zhao"],year:2024,venue:"ISSTA 2024",description:"Presents WasmRev, the first multi-modal pre-trained language model for WebAssembly reverse engineering. Learns generic representations concurrently from high-level source code, code documentation, and compiled WebAssembly via self-supervised learning. Outperforms state-of-the-art methods on type recovery and summarization.",keywords:["WebAssembly","Reverse Engineering","Machine Learning","Multi-modal Learning","Language Models","Type Recovery"],paper_url:"https://dl.acm.org/doi/10.1145/3650212.3652141",code_url:null,peer_reviewed:true},
+  {title:"That's a Tough Call: Challenges of Call Graph Construction for WebAssembly",authors:["Daniel Lehmann","Frank Tip"],year:2023,venue:"ISSTA 2023",description:"Presents the first systematic study addressing the unique challenges of constructing static call graphs for WebAssembly binaries. Identifies and classifies 12 specific challenges and encodes them into a suite of 24 executable microbenchmarks.",keywords:["WebAssembly","Call Graph","Static Analysis","Program Analysis","Microbenchmarks"],paper_url:"https://dl.acm.org/doi/10.1145/3597926.3598104",code_url:null,peer_reviewed:true},
+  {title:"A Comprehensive Study of WebAssembly Runtime Bugs",authors:["Yue Wang","Zhide Zhou","Zhilei Ren","Dong Liu","He Jiang"],year:2023,venue:"IEEE SANER 2023",description:"Presents the first comprehensive empirical study of 867 real-world bugs across four popular WebAssembly runtimes: V8, SpiderMonkey, Wasmer, and Wasmtime. Analyzes how these flaws can lead to security vulnerabilities in applications relying on them as execution engines.",keywords:["WebAssembly","Runtime Bugs","Empirical Study","V8","SpiderMonkey","Wasmer","Wasmtime","Bug Characteristics"],paper_url:"https://ieeexplore.ieee.org/document/10123536",code_url:null,peer_reviewed:true},
+  {title:"MineSweeper: An In-depth Look into Drive-by Cryptocurrency Mining and Its Defense",authors:["Radhesh Krishnan Konoth","Emanuele Vineti","Veelasha Moonsamy","Martina Lindorfer","Christopher Kruegel","Giovanni Vigna","Herbert Bos"],year:2018,venue:"ACM CCS 2018",description:"A comprehensive analysis of drive-by cryptocurrency mining by examining Alexa's Top 1 Million websites. Introduces MineSweeper, a defense system utilizing CPU performance counters and binary analysis to detect cryptomining signatures regardless of code obfuscation.",keywords:["WebAssembly","Cryptojacking","Malware Detection","Cryptocurrency Mining","Side-Channel Analysis","Web Security"],paper_url:"https://dl.acm.org/doi/10.1145/3243734.3243858",code_url:"https://github.com/vusec/minesweeper",peer_reviewed:true},
+  {title:"WASP: Stack protection for WebAssembly",authors:["Ewan Massey","Pierre Olivier"],year:2026,venue:"Journal of Systems Architecture",description:"Introduces WASP, a robust defense mechanism to mitigate stack-based buffer overflow vulnerabilities in WebAssembly binaries compiled from memory-unsafe languages. Implements stack canary-based protection within the Emscripten compiler and extends it with per-function call canary randomization to prevent canary leak attacks.",keywords:["WebAssembly","Stack Protector","Memory Safety","Stack Canaries","Emscripten","Buffer Overflow"],paper_url:"https://www.sciencedirect.com/science/article/pii/S1383762125003388",code_url:"https://github.com/ermassey/wasp",peer_reviewed:true},
+  {title:"POSTER: Leveraging eBPF to enhance sandboxing of WebAssembly runtimes",authors:["Marco Abbadini","Gianluca Oldani","Michele Beretta","Matthew Rossi"],year:2023,venue:"EuroSys 2023",description:"Proposes replacing traditional security checks in WASI hostcall wrappers with eBPF programs to enhance the sandboxing of WebAssembly runtimes. Demonstrates that integrating eBPF enables the enforcement of fine-grained, per-module security policies at the host interface level.",keywords:["WebAssembly","eBPF","Sandboxing","WASI","Security","Hostcalls","Runtime Protection"],paper_url:"https://dl.acm.org/doi/10.1145/3579856.3592831",code_url:null,peer_reviewed:true},
+  {title:"An Empirical Study of Bugs in WebAssembly Compilers",authors:["Alan Romano","Xinyue Liu","Yonghwi Kwon","Weihang Wang"],year:2021,venue:"IEEE ASE 2021",description:"Presents an in-depth empirical study to understand the characteristics, root causes, and impacts of bugs within WebAssembly compilers, with primary focus on Emscripten. Uncovers unique challenges in bridging high-level languages to the Web environment.",keywords:["WebAssembly","Compilers","Empirical Study","Bug Characteristics","Emscripten","Software Engineering"],paper_url:"https://dl.acm.org/doi/10.1109/ASE51524.2021.9678776",code_url:"https://wasm-compiler-bugs.github.io/",peer_reviewed:true},
+  {title:"Wasabi: A Framework for Dynamically Analyzing WebAssembly",authors:["Daniel Lehmann","Michael Pradel"],year:2019,venue:"ASPLOS 2019",description:"Presents Wasabi, the first general-purpose framework for dynamically analyzing WebAssembly. Utilizes binary instrumentation to insert calls to JavaScript-based analysis functions directly into the WebAssembly binary, providing a high-level API for heavyweight dynamic analysis.",keywords:["WebAssembly","Dynamic Analysis","Binary Instrumentation","Program Analysis","Security"],paper_url:"https://dl.acm.org/doi/10.1145/3297858.3304068",code_url:"https://github.com/danleh/wasabi",peer_reviewed:true},
+  {title:"CAGE: Hardware-Accelerated Safe WebAssembly",authors:["Martin Fink","Soham Chakraborty","Dimitrios Stavrakakis","Jan-Erik Ekberg"],year:2024,venue:"arXiv",description:"Proposes CAGE, a hardware-accelerated toolchain to enrich the memory safety properties of WebAssembly applications. Leverages Arm's Memory Tagging Extension (MTE) to enforce spatial and temporal safety for heap and stack allocations, and employs Arm's Pointer Authentication (PAC) to prevent leaked pointers.",keywords:["WebAssembly","Memory Safety","Hardware Acceleration","ARM MTE","ARM PAC","Sandboxing"],paper_url:"https://arxiv.org/abs/2408.11456",code_url:"https://github.com/TUM-DSE/cage-meta",peer_reviewed:false},
+  {title:"RichWasm: Safe, Fine-Grained, Shared-Memory Interoperability in WebAssembly",authors:["Zoe Paraskevopoulou","Michael Fitzgibbons","Noble Mushtak","Michelle Thalakottur","Jose Sulaiman Manzur","Amal Ahmed"],year:2024,venue:"arXiv",description:"Introduces RichWasm, a richly typed intermediate language based on WebAssembly facilitating safe, shared-memory interoperability between high-level languages with differing memory-safety guarantees. Formally verified in Coq.",keywords:["WebAssembly","Memory Safety","Interoperability","Type Systems","Shared Memory","Coq"],paper_url:"https://arxiv.org/abs/2401.08287",code_url:"https://github.com/RichWasm/RichWasm-artifact",peer_reviewed:false},
+  {title:"Exploring and Exploiting the Resource Isolation Attack Surface of WebAssembly Containers",authors:["Zhaofeng Yu","Dongyang Zhan","Lin Ye","Haining Yu","Hongli Zhang","Zhihong Tian"],year:2025,venue:"USENIX Security 2025",description:"Explores the resource isolation attack surface of WebAssembly runtimes, demonstrating that attackers can exploit WASI/WASIX interfaces to exhaust host resources and interfere with other container instances. Shows malicious Wasm instances can inflict significant performance degradation evading traditional Cgroups mechanisms.",keywords:["WebAssembly","Resource Isolation","Attack Surface","Static Analysis","WASI","Container Security","Rust"],paper_url:"https://www.usenix.org/conference/usenixsecurity25/presentation/yu-zhaofeng",code_url:"https://zenodo.org/records/16594863",peer_reviewed:true},
+  {title:"WADEC: Decompiling WebAssembly Using Large Language Model",authors:["Xinyu She","Yanjie Zhao"],year:2024,venue:"arXiv",description:"Introduces WADEC, a novel approach leveraging a fine-tuned Large Language Model to interpret and decompile WebAssembly binary code into higher-level C source code. Fine-tuned using a specialized dataset of WebAssembly text format and C code snippets via self-supervised learning.",keywords:["WebAssembly","Decompilation","Large Language Models","Reverse Engineering","C"],paper_url:"https://arxiv.org/abs/2406.11346",code_url:"https://github.com/security-pride/WaDec",peer_reviewed:false},
+  {title:"CRYPTIC BYTES: WebAssembly Obfuscation for Evading Cryptojacking Detection",authors:["Håkon Harnes","Donn Morrison"],year:2024,venue:"arXiv",description:"A comprehensive evaluation of code obfuscation techniques for WebAssembly, focusing on effectiveness in evading state-of-the-art cryptojacking detectors. Obfuscated applications using Tigress, wasm-mutate, and a novel tool emcc-obf, demonstrating successful evasion.",keywords:["WebAssembly","Obfuscation","Cryptojacking","Malware Detection","Evasion","Security"],paper_url:"https://arxiv.org/abs/2403.15197",code_url:null,peer_reviewed:false},
+  {title:"MineThrottle: Defending against Wasm In-Browser Cryptojacking",authors:["Weikang Bian","Wei Meng","Mingxue Zhang"],year:2020,venue:"WWW 2020",description:"Introduces MineThrottle, a browser-based defense mechanism to mitigate WebAssembly cryptojacking. Dynamically instruments Wasm code on the fly to detect malicious mining behavior using block-level program profiling, then throttles mining tasks based on user-configurable policies.",keywords:["WebAssembly","Cryptojacking","Cryptocurrency Mining","Browser Security","Malware Defense"],paper_url:"https://dl.acm.org/doi/10.1145/3366423.3380085",code_url:"https://github.com/cuhk-seclab/MineThrottle",peer_reviewed:true},
+  {title:"WebAssembly Diversification for Malware Evasion",authors:["Javier Cabrera-Arteaga","Martin Monperrus","Tim Toady","Benoit Baudry"],year:2022,venue:"arXiv",description:"Explores how automatic binary diversification can support the evasion of WebAssembly cryptojacking detectors. Evaluates evasion against VirusTotal and MINOS, demonstrating that diversification generates variants evading detection in 90% of VirusTotal cases and 100% for MINOS.",keywords:["WebAssembly","Software Diversification","Cryptojacking","Malware Evasion","Security"],paper_url:"https://arxiv.org/abs/2212.08427",code_url:"https://github.com/ASSERT-KTH/wasm_evasion",peer_reviewed:false},
+  {title:"SoK: Analysis Techniques for WebAssembly",authors:["Håkon Harnes","Donn Morrison"],year:2024,venue:"arXiv",description:"A Systematization of Knowledge (SoK) regarding analysis techniques for WebAssembly binaries, focusing on vulnerability analysis, cryptojacking detection, and smart contract security. Categorizes existing research into static, dynamic, and hybrid analysis methods.",keywords:["WebAssembly","Vulnerability Analysis","Browser Security","Cryptojacking","Smart Contracts","Systematization of Knowledge","Static Analysis","Dynamic Analysis"],paper_url:"https://arxiv.org/abs/2401.05943",code_url:null,peer_reviewed:false},
+  {title:"Static Stack-Preserving Intra-Procedural Slicing of WebAssembly",authors:["Quentin Stiévenart","David W. Binkley"],year:2022,venue:"ICSE 2022",description:"Proposes a static, intra-procedural, backward slicing approach specifically designed for WebAssembly programs. Overcomes considerable challenges of performing dependence analysis at the binary level while ensuring resulting slices comply with WebAssembly's strict stack validation requirements.",keywords:["WebAssembly","Program Slicing","Static Analysis","Binary Analysis","Reverse Engineering"],paper_url:"https://dl.acm.org/doi/10.1145/3510003.3510070",code_url:null,peer_reviewed:true},
+  {title:"Mechanising and Verifying the WebAssembly Specification",authors:["Conrad Watt"],year:2018,venue:"CPP 2018",description:"Introduces a mechanized Isabelle specification for the WebAssembly language, accompanied by a verified executable interpreter and type checker. Presents a fully mechanized proof of the soundness of the WebAssembly type system.",keywords:["WebAssembly","Formal Verification","Mechanized Specification","Isabelle","Type Soundness","Semantics"],paper_url:"https://dl.acm.org/doi/10.1145/3167082",code_url:"https://github.com/WasmCert/WasmCert-Isabelle",peer_reviewed:true},
+  {title:"Automatically Eliminating Speculative Leaks from Cryptographic Code with Blade",authors:["Marco Vassena","Craig Disselkoen","Klaus von Gleissenthall","Sunjay Cauligi","Rami Gökhan Kıcı","Ranjit Jhala","Dean Tullsen","Deian Stefan"],year:2021,venue:"POPL 2021",description:"Introduces BLADE, a novel approach to automatically and efficiently eliminate speculative execution leaks from cryptographic code. By formalizing a static type system, BLADE identifies and cuts the dataflow from expressions that speculatively introduce secrets to those that leak them through the cache.",keywords:["Speculative Execution","Cryptography","Security","Static Analysis","Type Systems","Spectre","Constant-Time"],paper_url:"https://dl.acm.org/doi/10.1145/3434330",code_url:"https://github.com/PLSysSec/blade",peer_reviewed:true},
+  {title:"eWASM: Practical Software Fault Isolation for Reliable Embedded Devices",authors:["Gregor Peach","Runyu Pan","Zhuoyi Wu","Gabriel Parmer","Christopher Haster","Ludmila Cherkasova"],year:2020,venue:"IEEE TCAD",description:"Introduces eWASM, a process abstraction that adapts WebAssembly for microcontrollers to safely constrain memory accesses and control flow. Enabled by the custom aWsm WebAssembly compiler, demonstrating effective sandboxing of C applications with performance within 40% of native C.",keywords:["WebAssembly","Embedded Systems","Software Fault Isolation","Microcontrollers","Sandboxing","Security"],paper_url:"https://ieeexplore.ieee.org/document/9211422",code_url:"https://github.com/gwsystems/awsm/",peer_reviewed:true},
+  {title:"TWINE: An Embedded Trusted Runtime for WebAssembly",authors:["Jämes Ménétrey","Marcelo Pasin","Pascal Felber","Valerio Schiavoni"],year:2021,venue:"IEEE ICDE 2021",description:"Describes TWINE, a WebAssembly trusted runtime designed to execute unmodified, language-independent applications. By leveraging Intel SGX, builds a runtime environment that avoids language-specific, complex APIs while providing secure execution and sandboxing.",keywords:["WebAssembly","Trusted Execution Environment","Intel SGX","Sandboxing","Security","TWINE"],paper_url:"https://arxiv.org/abs/2103.15860",code_url:"https://github.com/jamesmenetrey/unine-twine",peer_reviewed:true},
+  {title:"Indexed Types for a Statically Safe WebAssembly",authors:["Adam T. Geller","Justine Frank","William J. Bowman"],year:2024,venue:"POPL 2024",description:"Introduces Wasm-precheck, a superset of WebAssembly that leverages indexed types to statically express and verify simple constraints over program values. Enables the safe elimination of dynamic safety checks, achieving an average 1.71x performance gain on PolyBenchC.",keywords:["WebAssembly","Indexed Types","Static Analysis","Memory Safety","Formal Verification","Optimization"],paper_url:"https://dl.acm.org/doi/10.1145/3632922",code_url:null,peer_reviewed:true},
+  {title:"Going beyond the Limits of SFI: Hardware-Assisted In-Process Isolation with HFI",authors:["Shravan Narayan","Tal Garfinkel","Mohammadkazem Taram","Joey Rudek","Daniel Moghimi","Evan Johnson","Chris Fallin","Anjo Vahldiek-Oberwagner","Michael LeMay","Ravi Sahita","Dean Tullsen","Deian Stefan"],year:2023,venue:"ASPLOS 2023",description:"Introduces Hardware-assisted Fault Isolation (HFI), a simple processor extension for secure, flexible, and efficient in-process isolation. Addresses core limitations of SFI systems by providing primitives that integrate with WebAssembly runtimes or sandbox unmodified native binaries.",keywords:["WebAssembly","Software Fault Isolation","Hardware-Assisted Isolation","Sandboxing","Security"],paper_url:"https://research.google/pubs/going-beyond-the-limits-of-sfi-flexible-and-secure-hardware-assisted-in-process-isolation-with-hfi/",code_url:"https://github.com/PLSysSec/hfi-root",peer_reviewed:true},
+  {title:"Donky: Domain Keys - Efficient In-Process Isolation for RISC-V and x86",authors:["David Schrammel","Samuel Weiser","Stefan Steinegger","Martin Schwarzl","Michael Schwarz","Stefan Mangard","Daniel Gruss"],year:2020,venue:"USENIX Security 2020",description:"Presents Donky, an efficient hardware-software co-design for strong in-process isolation based on dynamic memory protection domains. Enables secure domain switches entirely within userspace on both RISC-V and x86 architectures.",keywords:["In-Process Isolation","Domain Keys","RISC-V","x86","Memory Protection","Hardware-Software Co-design","Sandboxing"],paper_url:"https://www.usenix.org/conference/usenixsecurity20/presentation/schrammel",code_url:"https://github.com/IAIK/Donky",peer_reviewed:true},
+  {title:"Fuzzing SGX Enclaves via Host Program Mutations",authors:["Arslan Khan","Muqi Zou","Kyungtae Kim","Dongyan Xu","Antonio Bianchi","Dave Jing Tian"],year:2023,venue:"IEEE EuroS&P 2023",description:"Proposes FUZZSGX, an input and program mutation-based fuzzer to automatically identify memory corruption and data race vulnerabilities within Intel SGX enclave implementations. Includes FUZZSGX RUNTIME, a drop-in library enabling code coverage and sanitization within enclaves.",keywords:["Intel SGX","Enclaves","Fuzzing","Software Security","Program Mutation","Confidential Computing"],paper_url:"https://ieeexplore.ieee.org/document/10190488",code_url:"https://github.com/purseclab/FuzzSGX",peer_reviewed:true},
+  {title:"Vivienne: Relational Verification of Cryptographic Implementations in WebAssembly",authors:["Rodothea Myrsini Tsoupidi","Musard Balliu","Benoit Baudry"],year:2021,venue:"arXiv",description:"Introduces Vivienne, an open-source tool for relational symbolic execution of WebAssembly programs to automatically analyze cryptographic libraries for constant-time violations. Integrates automated theorem provers including support for loops via relational invariants. Evaluated on 57 real-world cryptographic implementations.",keywords:["WebAssembly","Cryptography","Constant-Time","Relational Symbolic Execution","Side-Channel Analysis","Security Verification"],paper_url:"https://arxiv.org/abs/2109.01386",code_url:"https://github.com/romits800/Vivienne",peer_reviewed:false},
+  {title:"Rapid Prototyping for Microarchitectural Attacks",authors:["Catherine Easdon","Michael Schwarz","Martin Schwarzl","Daniel Gruss"],year:2022,venue:"USENIX Security 2022",description:"Examines the development process, existing tooling limitations, and real-world implementation challenges associated with microarchitectural attacks. Proposes a novel approach based on rapid prototyping and introduces two open-source frameworks designed to assist practitioners.",keywords:["Microarchitectural Attacks","Rapid Prototyping","Side-Channel Attacks","Security Tooling"],paper_url:"https://www.usenix.org/system/files/sec22-easdon.pdf",code_url:"https://github.com/libtea/frameworks",peer_reviewed:true},
+  {title:"RØB: Ransomware over Modern Web Browsers",authors:["Harun Oz","Ahmet Aris","Abbas Acar","Güliz Seray Tuncay","Leonardo Babun","Selcuk Uluagac"],year:2023,venue:"USENIX Security 2023",description:"Introduces RØB, the first study demonstrating the feasibility of ransomware attacks conducted entirely through modern web browsers by abusing the File System Access API. Demonstrates how a malicious website can use WebAssembly-based encryption to lock files at near-native speeds.",keywords:["WebAssembly","Ransomware","Browser Security","File System Access API","Malware","Machine Learning Detection"],paper_url:"https://www.usenix.org/conference/usenixsecurity23/presentation/oz",code_url:"https://github.com/cslfiu/RoB_Ransomware_over_Modern_Web_Browsers",peer_reviewed:true},
+  {title:"Outguard: Detecting In-Browser Covert Cryptocurrency Mining in the Wild",authors:["Amin Kharraz","Zane Ma","Charles Lever","Joshua Mason","Andrew Miller","Nikita Borisov","Manos Antonakakis","Michael Bailey"],year:2019,venue:"WWW 2019",description:"Introduces OUTGUARD, an automated system to detect in-browser cryptojacking by monitoring browser-level features. Identifies seven distinctive features to train an SVM classifier. Applied across the Alexa Top 1M websites, uncovered over 6,000 cryptojacking sites.",keywords:["WebAssembly","Cryptojacking","Browser Security","Malware Detection","Machine Learning","SVM","WebWorkers"],paper_url:"https://dl.acm.org/doi/10.1145/3308558.3313665",code_url:"https://github.com/teamnsrg/outguard",peer_reviewed:true},
+  {title:"WebAssembly and Security: a review",authors:["Gaetano Perrone","Simon Pietro Romano"],year:2024,venue:"arXiv",description:"A comprehensive review examining the dual nature of WebAssembly in the context of software security, analyzing it both as a target for exploitation and as a powerful tool for enhancing system security. Covers sandboxing mechanisms, vulnerability landscape, and misuse in cryptojacking and evasion.",keywords:["WebAssembly","Software Security","Sandboxing","Vulnerability Analysis","Cryptojacking","Formal Verification","Survey"],paper_url:"https://arxiv.org/abs/2407.12297",code_url:null,peer_reviewed:false},
+  {title:"WASMDYPA: Effectively Detecting WebAssembly Bugs via Dynamic Program Analysis",authors:["Wenlong Zheng","Baojian Hua"],year:2024,venue:"IEEE SANER 2024",description:"Introduces WASMDYPA, the first automated bug detection framework for WebAssembly based on dynamic program analysis on binaries. Integrates a grammar-based input generator, dynamic execution engine, and bug detector utilizing dynamic slicing. Outperforms state-of-the-art fuzzers like Wasm-AFL.",keywords:["WebAssembly","Bug Detection","Dynamic Program Analysis","Dynamic Slicing","Software Security","Vulnerability Analysis"],paper_url:"https://ieeexplore.ieee.org/document/10589844",code_url:null,peer_reviewed:true},
+  {title:"Automated Verification for Secure Messaging Protocols and Their Implementations",authors:["Nadim Kobeissi","Karthikeyan Bhargavan","Bruno Blanchet"],year:2017,venue:"IEEE EuroS&P 2017",description:"Proposes a methodology enabling automated verification of end-to-end secure messaging protocols. Introduces ProScript, a domain-specific language for writing cryptographic protocols that can be executed in JavaScript programs and automatically translated into an applied pi calculus model analyzable via ProVerif and CryptoVerif.",keywords:["Secure Messaging","Automated Verification","ProScript","ProVerif","CryptoVerif","Cryptographic Protocols"],paper_url:"https://ieeexplore.ieee.org/document/7961995",code_url:null,peer_reviewed:true},
+
+  {title:"Wasmizer: Curating WebAssembly-driven Projects on GitHub",authors:["Alexander Nicholson","Quentin Stiévenart","Arash Mazidi","Mohammad Ghafari"],year:2023,venue:"arXiv",description:"Introduces Wasmizer, a tool that regularly mines GitHub to curate an up-to-date dataset of WebAssembly-driven projects and their associated binaries. Collected 2,540 C and C++ projects related to WebAssembly and investigates the prevalence of eight specific WebAssembly compilation 'smells'.",keywords:["WebAssembly","Dataset","Mining Software Repositories","C/C++","Compilation Smells"],paper_url:"https://arxiv.org/abs/2303.09623",code_url:"https://github.com/arash-mazidi/WASMIZER",peer_reviewed:false}
+];
+
+/* ═══════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════ */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon').textContent = isDark ? '☾' : '☀';
+  try { localStorage.setItem('wasmsec-theme', isDark ? 'light' : 'dark'); } catch(e){}
+}
+
+// Restore saved theme on load
+(function(){
+  try {
+    const saved = localStorage.getItem('wasmsec-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('theme-icon').textContent = saved === 'light' ? '☾' : '☀';
+    }
+  } catch(e){}
+})();
+
+/* ═══════════════════════════════════════════
+   PAGE NAVIGATION
+═══════════════════════════════════════════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const navBtn = document.getElementById('nav-' + name);
+  if (navBtn) navBtn.classList.add('active');
+  window.scrollTo({ top: 0 });
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function openModal(paper) {
+  document.getElementById('m-venue').textContent = paper.venue || 'Preprint';
+  document.getElementById('m-year').textContent = paper.year;
+  const peerEl = document.getElementById('m-peer');
+  peerEl.style.display = paper.peer_reviewed ? '' : 'none';
+  document.getElementById('m-title').textContent = paper.title;
+  document.getElementById('m-authors').textContent = paper.authors.join(', ');
+  document.getElementById('m-desc').textContent = paper.description;
+
+  const tagsEl = document.getElementById('m-tags');
+  tagsEl.innerHTML = paper.keywords.map(k =>
+    `<span class="tag" onclick="filterByTag('${k.replace(/'/g,"\\'")}'); closeModal();">${k}</span>`
+  ).join('');
+
+  const linksEl = document.getElementById('m-links');
+  let linksHTML = '';
+  if (paper.paper_url) linksHTML += `<a class="modal-link-btn pdf" href="${paper.paper_url}" target="_blank">↗ View Paper</a>`;
+  if (paper.code_url) linksHTML += `<a class="modal-link-btn code" href="${paper.code_url}" target="_blank"><span class="code-dot"></span> View Code</a>`;
+  linksEl.innerHTML = linksHTML;
+  linksEl.style.display = (paper.paper_url || paper.code_url) ? '' : 'none';
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ═══════════════════════════════════════════
+   BROWSE STATE
+═══════════════════════════════════════════ */
+let activeKeywords = new Set();
+let activeYears = new Set();
+let codeOnly = false;
+
+function getTopKeywords(n = 16) {
+  const freq = {};
+  PAPERS.forEach(p => p.keywords.forEach(k => { freq[k] = (freq[k]||0)+1; }));
+  return Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, n).map(e => e[0]);
+}
+
+function getYears() {
+  return [...new Set(PAPERS.map(p => p.year))].sort((a,b) => b-a);
+}
+
+function renderFilters() {
+  const kwContainer = document.getElementById('keyword-filters');
+  kwContainer.innerHTML = '<span class="filter-row-label">Topic</span>';
+  getTopKeywords().forEach(kw => {
+    const pill = document.createElement('span');
+    pill.className = 'pill' + (activeKeywords.has(kw) ? ' active' : '');
+    pill.textContent = kw;
+    pill.onclick = () => toggleKeyword(kw);
+    kwContainer.appendChild(pill);
+  });
+
+  const yrContainer = document.getElementById('year-filters');
+  yrContainer.innerHTML = '<span class="filter-row-label">Year</span>';
+  getYears().forEach(yr => {
+    const pill = document.createElement('span');
+    pill.className = 'pill' + (activeYears.has(yr) ? ' active' : '');
+    pill.textContent = yr;
+    pill.onclick = () => toggleYear(yr);
+    yrContainer.appendChild(pill);
+  });
+}
+
+function toggleKeyword(kw) {
+  if (activeKeywords.has(kw)) activeKeywords.delete(kw); else activeKeywords.add(kw);
+  renderFilters(); renderPapers();
+}
+
+function toggleYear(yr) {
+  if (activeYears.has(yr)) activeYears.delete(yr); else activeYears.add(yr);
+  renderFilters(); renderPapers();
+}
+
+function filterByTag(kw) {
+  if (!activeKeywords.has(kw)) activeKeywords.add(kw);
+  renderFilters(); renderPapers();
+  showPage('browse');
+}
+
+function clearFilters() {
+  activeKeywords.clear(); activeYears.clear();
+  codeOnly = false;
+  document.getElementById('search').value = '';
+  document.getElementById('code-toggle').classList.remove('active');
+  document.getElementById('sort').value = 'date-desc';
+  renderFilters(); renderPapers();
+}
+
+function highlight(text, query) {
+  if (!query) return text;
+  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return String(text).replace(re, '<mark>$1</mark>');
+}
+
+function renderPapers() {
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  const sortVal = document.getElementById('sort').value;
+  const grid = document.getElementById('papers-grid');
+  const noResults = document.getElementById('no-results');
+
+  let filtered = PAPERS.filter(p => {
+    if (codeOnly && !p.code_url) return false;
+    if (activeKeywords.size > 0 && ![...activeKeywords].some(k => p.keywords.includes(k))) return false;
+    if (activeYears.size > 0 && !activeYears.has(p.year)) return false;
+    if (query) {
+      const hay = (p.title+' '+p.authors.join(' ')+' '+p.keywords.join(' ')+' '+p.description+' '+(p.venue||'')).toLowerCase();
+      if (!query.split(/\s+/).every(q => hay.includes(q))) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortVal === 'date-desc') return b.year - a.year;
+    if (sortVal === 'date-asc') return a.year - b.year;
+    if (sortVal === 'title-asc') return a.title.localeCompare(b.title);
+    if (sortVal === 'title-desc') return b.title.localeCompare(a.title);
+    return 0;
+  });
+
+  grid.innerHTML = '';
+  if (filtered.length === 0) {
+    grid.style.display = 'none'; noResults.classList.add('show');
+  } else {
+    grid.style.display = ''; noResults.classList.remove('show');
+    filtered.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'paper-card';
+
+      const authorsStr = p.authors.slice(0,3).join(', ') + (p.authors.length > 3 ? ` +${p.authors.length-3} more` : '');
+      const titleHL = highlight(p.title, query);
+      const authorsHL = highlight(authorsStr, query);
+
+      const tagsHTML = p.keywords.slice(0,4).map(k =>
+        `<span class="tag" onclick="event.stopPropagation(); filterByTag('${k.replace(/'/g,"\\'")}');">${k}</span>`
+      ).join('');
+
+      let linksHTML = '';
+      if (p.paper_url) linksHTML += `<a class="link-btn pdf" href="${p.paper_url}" target="_blank" onclick="event.stopPropagation()">↗ Paper</a>`;
+      if (p.code_url) linksHTML += `<a class="link-btn code" href="${p.code_url}" target="_blank" onclick="event.stopPropagation()"><span class="code-dot"></span>Code</a>`;
+
+      card.innerHTML = `
+        <div class="paper-meta-top">
+          <span class="paper-venue">${p.venue||'Preprint'}</span>
+          <span class="paper-year">${p.year}</span>
+        </div>
+        <div class="paper-title">${titleHL}</div>
+        <div class="paper-authors">${authorsHL}</div>
+        <div class="paper-desc">${p.description}</div>
+        <div class="paper-tags">${tagsHTML}</div>
+        ${linksHTML ? `<div class="paper-links">${linksHTML}</div>` : ''}
+      `;
+
+      card.addEventListener('click', () => openModal(p));
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('showing-count').textContent = filtered.length;
+  document.getElementById('total-showing').textContent = PAPERS.length;
+}
+
+function renderStats() {
+  document.getElementById('total-count').textContent = PAPERS.length;
+  document.getElementById('code-count').textContent = PAPERS.filter(p => p.code_url).length;
+  const yrs = PAPERS.map(p => p.year);
+  document.getElementById('year-range').textContent = Math.min(...yrs) + '–' + Math.max(...yrs);
+}
+
+/* ═══════════════════════════════════════════
+   EVENT LISTENERS
+═══════════════════════════════════════════ */
+document.getElementById('search').addEventListener('input', renderPapers);
+document.getElementById('sort').addEventListener('change', renderPapers);
+
+document.getElementById('code-toggle').addEventListener('click', function() {
+  codeOnly = !codeOnly;
+  this.classList.toggle('active', codeOnly);
+  renderPapers();
+});
+
+/* INIT */
+renderStats();
+renderFilters();
+renderPapers();
+</script>
+</body>
+</html>
