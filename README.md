@@ -34,6 +34,7 @@ This repository tracks academic research addressing these challenges. All papers
 | [Intel Software Guard Extensions Applications: A Survey](https://dl.acm.org/doi/10.1145/3593021) | Will, Maziero | ACM Computing Surveys | 2023 | — | — |
 | [WebAssembly across Platforms: Running Native Apps in the Browser, Cloud, and Edge](https://doi.org/10.63282/3050-9246.IJETCSIT-V311P112) | Rusum | IJETCSIT | 2022 | — | — |
 | [Wasmizer: Curating WebAssembly-driven Projects on GitHub](https://arxiv.org/abs/2303.09623) | Nicholson et al. | arXiv | 2023 | [PDF](https://arxiv.org/abs/2303.09623) | [Code](https://github.com/arash-mazidi/WASMIZER) |
+| [Dead Weight: Analyzing Code Bloat and Its Security Implications in WebAssembly Binaries](https://link.springer.com/chapter/10.1007/978-3-031-98011-8_7) | Kamble, Prakash | DIMVA 2026 | 2026 | — | — |
 
 ---
 
@@ -68,6 +69,7 @@ This repository tracks academic research addressing these challenges. All papers
 | [SFI safety for native-compiled Wasm (VeriWasm)](https://www.ndss-symposium.org/wp-content/uploads/ndss2021_5B-3_24078_paper.pdf) | Johnson et al. | NDSS 2021 | 2021 | [PDF](https://www.ndss-symposium.org/wp-content/uploads/ndss2021_5B-3_24078_paper.pdf) | [Code](https://veriwasm.programming.systems) |
 | [Gobi: WebAssembly as a Practical Path to Library Sandboxing](https://arxiv.org/abs/1912.02285) | Narayan et al. | arXiv | 2019 | [PDF](https://arxiv.org/abs/1912.02285) | — |
 | [Put Your Memory in Order: Efficient Domain-based Memory Isolation for WASM](https://dl.acm.org/doi/10.1145/3576915.3623205) | Lei et al. | ACM CCS 2023 | 2023 | [PDF](https://dl.acm.org/doi/10.1145/3576915.3623205) | [Code](https://github.com/PKU-ASAL/PKUWA) |
+| [Bento: Fine-Grained Memory Isolation for COTS WebAssembly Binaries](https://doi.org/10.1145/3774904.3792439) | Draissi, Davi | WWW 2026 | 2026 | [PDF](https://doi.org/10.1145/3774904.3792439) | — |
 | [Going beyond the Limits of SFI: Hardware-Assisted In-Process Isolation with HFI](https://research.google/pubs/going-beyond-the-limits-of-sfi-flexible-and-secure-hardware-assisted-in-process-isolation-with-hfi/) | Narayan et al. | ASPLOS 2023 | 2023 | [PDF](https://research.google/pubs/going-beyond-the-limits-of-sfi-flexible-and-secure-hardware-assisted-in-process-isolation-with-hfi/) | [Code](https://github.com/PLSysSec/hfi-root) |
 | [Donky: Domain Keys — Efficient In-Process Isolation for RISC-V and x86](https://www.usenix.org/conference/usenixsecurity20/presentation/schrammel) | Schrammel et al. | USENIX Security 2020 | 2020 | [PDF](https://www.usenix.org/conference/usenixsecurity20/presentation/schrammel) | [Code](https://github.com/IAIK/Donky) |
 | [WASHADOW: Protecting WebAssembly Memory Through VM-Aware Shadow Memory](https://ieeexplore.ieee.org/document/10945011) | Jiang, Hua | IEEE TrustCom 2024 | 2024 | [PDF](https://ieeexplore.ieee.org/document/10945011) | — |
@@ -76,6 +78,7 @@ This repository tracks academic research addressing these challenges. All papers
 | [WaSC: Hardening WebAssembly Sandboxes via System Interface Decoupling](https://dl.acm.org/doi/10.1145/3795882) | Yu, Xiong, Tang, Jiang, Wei, Wang, Chen, Wang, Peng, Qi | ACM TACO | 2025 | [PDF](https://dl.acm.org/doi/10.1145/3795882) | — |
 | [metaSafer: A Technique to Detect Heap Metadata Corruption in WebAssembly](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10296897) | Song, Park, Kwon | IEEE Access | 2023 | [PDF](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10296897) | — |
 | [CAGE: Hardware-Accelerated Safe WebAssembly](https://arxiv.org/abs/2408.11456) | Fink et al. | arXiv | 2024 | [PDF](https://arxiv.org/abs/2408.11456) | [Code](https://github.com/TUM-DSE/cage-meta) |
+| [WebAssembly Memory Tagging](https://doi.org/10.1145/3733812.3765536) | Wang, Prakash | CCSW 2025 | 2025 | [PDF](https://doi.org/10.1145/3733812.3765536) | — |
 | [POSTER: Leveraging eBPF to enhance sandboxing of WebAssembly runtimes](https://dl.acm.org/doi/10.1145/3579856.3592831) | Abbadini et al. | EuroSys 2023 | 2023 | [PDF](https://dl.acm.org/doi/10.1145/3579856.3592831) | — |
 | [WARD: Efficient Memory Protection for WebAssembly on Tiny Embedded Systems](https://doi.org/10.1109/ACCESS.2025.3650447) | Shin et al. | IEEE Access | 2026 | — | — |
 | [eWASM: Practical Software Fault Isolation for Reliable Embedded Devices](https://ieeexplore.ieee.org/document/9211422) | Peach et al. | IEEE TCAD | 2020 | [PDF](https://ieeexplore.ieee.org/document/9211422) | [Code](https://github.com/gwsystems/awsm/) |
@@ -208,6 +211,7 @@ This repository tracks academic research addressing these challenges. All papers
 | Title | Authors | Venue | Year | Paper | Code |
 |---|---|---|---|---|---|
 | [RØB: Ransomware over Modern Web Browsers](https://www.usenix.org/conference/usenixsecurity23/presentation/oz) | Oz et al. | USENIX Security 2023 | 2023 | [PDF](https://www.usenix.org/conference/usenixsecurity23/presentation/oz) | [Code](https://github.com/cslfiu/RoB_Ransomware_over_Modern_Web_Browsers) |
+| [From WebAssembly Memory Corruption to Cross-Origin XS-Leaks](https://doi.org/10.2139/ssrn.7198231) | Sevri | SSRN | 2026 | [PDF](https://doi.org/10.2139/ssrn.7198231) | [Code](https://doi.org/10.5281/zenodo.21285164) |
 | [FP-tracer: Fine-grained Browser Fingerprinting Detection via Taint-tracking](https://petsymposium.org/popets/2024/popets-2024-0092.pdf) | Boussaha et al. | PoPETs 2024 | 2024 | [PDF](https://petsymposium.org/popets/2024/popets-2024-0092.pdf) | [Code](https://github.com/soumboussaha/FP-tracer) |
 | [WasmView: Visual Testing for WebAssembly Applications](https://dl.acm.org/doi/10.1145/3377812.3382155) | Romano, Wang | ICSE-Companion 2020 | 2020 | [PDF](https://dl.acm.org/doi/10.1145/3377812.3382155) | [Code](https://github.com/wasmview/wasmview.github.io) |
 | [WASMEYE: Language- and Platform-Independent Anomaly Detection for WebAssembly](https://dl.acm.org/doi/pdf/10.1145/3721462.3730957) | Vogel et al. | Middleware 2025 | 2025 | [PDF](https://dl.acm.org/doi/pdf/10.1145/3721462.3730957) | — |
@@ -231,6 +235,7 @@ This repository tracks academic research addressing these challenges. All papers
 | [Finding the Dwarf: Recovering Precise Types from WebAssembly Binaries](https://dl.acm.org/doi/10.1145/3519939.3523449) | Lehmann, Pradel | PLDI 2022 | 2022 | [PDF](https://dl.acm.org/doi/10.1145/3519939.3523449) | — |
 | [Multi-modal Learning for WebAssembly Reverse Engineering](https://dl.acm.org/doi/10.1145/3650212.3652141) | Huang, Zhao | ISSTA 2024 | 2024 | [PDF](https://dl.acm.org/doi/10.1145/3650212.3652141) | — |
 | [WADEC: Decompiling WebAssembly Using Large Language Model](https://arxiv.org/abs/2406.11346) | She, Zhao | arXiv | 2024 | [PDF](https://arxiv.org/abs/2406.11346) | [Code](https://github.com/security-pride/WaDec) |
+| [NotDec: WebAssembly Decompilation With Inter-Procedural Type Recovery](https://doi.org/10.1145/3744916.3787762) | Wang, He, Liu, Wang, Wang | ICSE 2026 | 2026 | [PDF](https://doi.org/10.1145/3744916.3787762) | [Code](https://github.com/NotDec/NotDec) |
 | [Automated WebAssembly Function Purpose Identification With Semantics-Aware Analysis](https://dl.acm.org/doi/pdf/10.1145/3543507.3583235) | Romano, Wang | WWW 2023 | 2023 | [PDF](https://dl.acm.org/doi/pdf/10.1145/3543507.3583235) | — |
 | [WasmWalker: Path-based Code Representations for Improved WebAssembly Program Analysis](https://arxiv.org/abs/2410.08517) | Robati Shirzad, Lam | arXiv | 2024 | [PDF](https://arxiv.org/abs/2410.08517) | — |
 
