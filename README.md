@@ -1,4 +1,4 @@
-# WasmSec — WebAssembly Security Papers
+# WasmSec - WebAssembly Security Papers Collection
 
 > A curated collection of academic papers covering the intersection of **WebAssembly and security** from memory safety and sandboxing to malware detection, formal verification, program analysis, dataset generation and side-channel attacks.
 
@@ -165,6 +165,7 @@ This repository tracks academic research addressing these challenges. All papers
 | [WASM-MUTATE: Fast and Effective Binary Diversification for WebAssembly](https://arxiv.org/abs/2309.07638) | Cabrera-Arteaga et al. | arXiv | 2023 | [PDF](https://arxiv.org/abs/2309.07638) | — |
 | [Deceptive bytes: In-depth Evaluation of WebAssembly Obfuscation for Evading Crypto Mining Detection](https://nva.sikt.no/registration/0198eb542a7e-66fdfde1-1ff3-48de-9a47-38fd290d5819) | Harnes | NTNU Master's Thesis | 2023 | — | [Code](https://github.com/HakonHarnes/wasm-obf) |
 | [CRYPTIC BYTES: WebAssembly Obfuscation for Evading Cryptojacking Detection](https://arxiv.org/abs/2403.15197) | Harnes, Morrison | arXiv | 2024 | [PDF](https://arxiv.org/abs/2403.15197) | — |
+| [A Systematic LLM-Based Procedure for the Deobfuscation of WebAssembly: Benchmark and Security Evaluation](https://ieeexplore.ieee.org/document/11658579) | Cheon, Jung, Lee | IEEE Access | 2026 | [PDF](https://ieeexplore.ieee.org/document/11658579) | [Code](https://github.com/ku-air/llm-wasm-deobf) |
 | [SELWasm: A Code Protection Mechanism for WebAssembly](https://ieeexplore.ieee.org/document/9047432) | Sun et al. | IEEE ISPA 2019 | 2019 | [PDF](https://ieeexplore.ieee.org/document/9047432) | — |
 | [AndroWasm: Empirical Study on Android Malware Obfuscation through WebAssembly](https://arxiv.org/pdf/2602.18082) | Soi et al. | arXiv | 2026 | [PDF](https://arxiv.org/pdf/2602.18082) | — |
 | [The WASM Cloak: Evaluating Browser Fingerprinting Defenses Under WebAssembly Obfuscation](https://arxiv.org/abs/2508.21219) | Sakib et al. | arXiv | 2025 | [PDF](https://arxiv.org/abs/2508.21219) | — |
@@ -191,6 +192,7 @@ This repository tracks academic research addressing these challenges. All papers
 | [A Comprehensive Trusted Runtime for WebAssembly with Intel SGX (TWINE)](https://arxiv.org/pdf/2312.09087) | Ménétrey et al. | IEEE TDSC | 2023 | [PDF](https://arxiv.org/pdf/2312.09087) | — |
 | [TWINE: An Embedded Trusted Runtime for WebAssembly](https://arxiv.org/abs/2103.15860) | Ménétrey et al. | IEEE ICDE 2021 | 2021 | [PDF](https://arxiv.org/abs/2103.15860) | [Code](https://github.com/jamesmenetrey/unine-twine) |
 | [AccTEE: A WebAssembly-based Two-way Sandbox for Trusted Resource Accounting](https://dl.acm.org/doi/10.1145/3361525.3361541) | Goltzsche et al. | Middleware 2019 | 2019 | [PDF](https://dl.acm.org/doi/10.1145/3361525.3361541) | — |
+| [Poster: Fingerprinting WebAssembly Applications in Trusted Execution Environments via File-System Interactions](https://doi.org/10.1145/3830454.3846455) | Pavoni, Bohoyo-Bengoetxea, Sánchez-Artigas, Marin | ACM CCS 2026 | 2026 | [PDF](https://doi.org/10.1145/3830454.3846455) | — |
 | [SYMGX: Detecting Cross-boundary Pointer Vulnerabilities of SGX Applications](https://dl.acm.org/doi/10.1145/3576915.3623213) | Wang et al. | ACM CCS 2023 | 2023 | [PDF](https://dl.acm.org/doi/10.1145/3576915.3623213) | [Code](https://github.com/PKU-ASAL/WASEM) |
 | [Fuzzing SGX Enclaves via Host Program Mutations](https://ieeexplore.ieee.org/document/10190488) | Khan et al. | IEEE EuroS&P 2023 | 2023 | [PDF](https://ieeexplore.ieee.org/document/10190488) | [Code](https://github.com/purseclab/FuzzSGX) |
 
@@ -236,6 +238,8 @@ This repository tracks academic research addressing these challenges. All papers
 | [Multi-modal Learning for WebAssembly Reverse Engineering](https://dl.acm.org/doi/10.1145/3650212.3652141) | Huang, Zhao | ISSTA 2024 | 2024 | [PDF](https://dl.acm.org/doi/10.1145/3650212.3652141) | — |
 | [WADEC: Decompiling WebAssembly Using Large Language Model](https://arxiv.org/abs/2406.11346) | She, Zhao | arXiv | 2024 | [PDF](https://arxiv.org/abs/2406.11346) | [Code](https://github.com/security-pride/WaDec) |
 | [NotDec: WebAssembly Decompilation With Inter-Procedural Type Recovery](https://doi.org/10.1145/3744916.3787762) | Wang, He, Liu, Wang, Wang | ICSE 2026 | 2026 | [PDF](https://doi.org/10.1145/3744916.3787762) | [Code](https://github.com/NotDec/NotDec) |
+| [StackSight: Unveiling WebAssembly through Large Language Models and Neurosymbolic Chain-of-Thought Decompilation](https://proceedings.mlr.press/v235/fang24e.html) | Fang, Zhou, He, Wang | ICML 2024 | 2024 | [PDF](https://proceedings.mlr.press/v235/fang24e.html) | — |
+| [Obfuscation-Resilient Purpose Identification for WebAssembly Functions](https://doi.org/10.1145/3837761) | Zhang, Jin, Gao, Dong | ACM TOIT | 2027 | [PDF](https://doi.org/10.1145/3837761) | — |
 | [Automated WebAssembly Function Purpose Identification With Semantics-Aware Analysis](https://dl.acm.org/doi/pdf/10.1145/3543507.3583235) | Romano, Wang | WWW 2023 | 2023 | [PDF](https://dl.acm.org/doi/pdf/10.1145/3543507.3583235) | — |
 | [WasmWalker: Path-based Code Representations for Improved WebAssembly Program Analysis](https://arxiv.org/abs/2410.08517) | Robati Shirzad, Lam | arXiv | 2024 | [PDF](https://arxiv.org/abs/2410.08517) | — |
 
